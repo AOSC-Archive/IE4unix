@@ -94,19 +94,12 @@ export IES4LINUX_MODE="gui"
 		export MESSAGE_FILE=$(echo $langline | awk '{print $3}')
 		export MESSAGE_FILE_FULLPATH="$IES4LINUX/lang/$MESSAGE_FILE.sh"
 
-		# Hebrew/Russian hack
-		# TODO remove this hack :-)
-		if [ "$MESSAGE_FILE" = "heIL" ] || [ "$MESSAGE_FILE" = "ruRU" ]; then
-			debug Hebrew hack
-			. "$MESSAGE_FILE_FULLPATH" &> /dev/null
-		else
-			debug Loading lang/$MESSAGE_FILE.sh
-			load_default_language
-		
-			debug Loading $MESSAGE_FILE with iconv
-			enc=$TRANSLATION_ENCODING
-			eval $(load_variables_file "$MESSAGE_FILE_FULLPATH" | iconv -f $enc 2> /dev/null )
-		fi
+		debug Loading lang/$MESSAGE_FILE.sh
+		load_default_language
+	
+		debug Loading $MESSAGE_FILE with iconv
+		enc=$TRANSLATION_ENCODING
+		eval $(load_variables_file "$MESSAGE_FILE_FULLPATH" | iconv -f $enc 2> /dev/null )
 	fi
 }
 
@@ -122,7 +115,7 @@ else
 	if [ "$DARWIN" = "1" ]; then
 		export DARWIN_DOWNLOAD_CABEXTRACT=1
 	else
-		$MSG_ERROR_INSTALL_CABEXTRACT
+		error $MSG_ERROR_INSTALL_CABEXTRACT
 	fi
 fi
 
