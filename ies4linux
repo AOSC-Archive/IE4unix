@@ -11,6 +11,15 @@ IES4LINUX=`dirname "$0"`
 cd "$IES4LINUX"
 export IES4LINUX=`pwd`
 
+# Where are we running?
+export LINUX=0
+export DARWIN=0
+if [ $(uname) = "Darwin" ]; then
+	export DARWIN=1
+elif [ $(uname) = "Linux" ]; then
+	export LINUX=1
+fi
+
 # Import functions
 # TODO don't use period operator
 . "$IES4LINUX"/lib/functions.sh
@@ -32,6 +41,7 @@ export INSTALLIE15=0
 export INSTALLIE1=0
 
 export INSTALLFLASH=1
+export INSTALLCOREFONTS=1
 export CREATE_DESKTOP_ICON=1
 export CREATE_MENU_ICON=1
 
@@ -101,11 +111,30 @@ export IES4LINUX_MODE="gui"
 }
 
 # Check dependencies for wine, cabextract, wget, unzip ########################
-wine --version &> /dev/null || error $MSG_ERROR_INSTALL_WINE
-cabextract --version &> /dev/null || error $MSG_ERROR_INSTALL_CABEXTRACT
-wget --version &> /dev/null || error $MSG_ERROR_INSTALL_WGET
-unzip -version &> /dev/null || error $MSG_ERROR_INSTALL_UNZIP
-cabextract --version | grep -q "1."   || error $MSG_ERROR_UPDATE_CABEXTRACT
+# TODO find other wines
+which wine &> /dev/null || error $MSG_ERROR_INSTALL_WINE
+which unzip &> /dev/null || error $MSG_ERROR_INSTALL_UNZIP
+
+# check for cabextract
+if which cabextract &> /dev/null ; then
+	cabextract --version | grep -q "1."   || error $MSG_ERROR_UPDATE_CABEXTRACT
+else
+	if [ "$DARWIN" = "1" ]; then
+		export DARWIN_DOWNLOAD_CABEXTRACT=1
+	else
+		$MSG_ERROR_INSTALL_CABEXTRACT
+	fi
+fi
+
+# check for wget or curl
+if which wget &> /dev/null; then
+	export HASWGET=1
+elif which curl &> /dev/null; then
+	export HASCURL=1
+else
+	error $MSG_ERROR_INSTALL_WGET
+fi
+
 wine --version 2>&1  | grep -q "0.9." || warning $MSG_WARNING_OLDWINE
 [ "$(whoami)" = "root" ] && warning $MSG_WARNING_ROOT
 

@@ -1,3 +1,7 @@
+
+
+
+# IEs4Linux - Copyright Sergio Lopes
 # Functions needed everywhere.
 # All functions *should* be declared using 'function' keyword.
 # All global variables used by functions should have function name in their name.
@@ -39,7 +43,15 @@ function download {
 		printDownloadPercentage $FILENAME 0
 
 		touch "$file"
-		pid=$(wget -q -b -o /dev/null $URL $WGETFLAGS -O "$file" | sed -e 's/[^0-9]//g')
+		if [ "$HASWGET" = "1" ]; then
+			pid=$(wget -q -b -o /dev/null $URL $WGETFLAGS -O "$file" | sed -e 's/[^0-9]//g')
+		elif [ "$HASCURL" = "1" ]; then
+			( curl -s "$URL" -o "$file" & )
+			pid=$(ps | grep curl | head -n 1 | awk '{print $1}' )
+		else
+			error no download program!
+		fi
+
 		while ps --pid $pid &> /dev/null; do
 			if [ "$correctsize" != "" ];then
 				du=$(getFileSize "$file")
@@ -69,6 +81,7 @@ function download {
 	# Check file size and md5
 	size=$(getFileSize "$file")
 	md5=$(getMD5 "$file")
+	debug ${DIR}${FILENAME}: correctsize $correctsize correctmd5 $correctmd5
 	debug ${DIR}${FILENAME}: size $size md5 $md5
 
 	if [ "$correctmd5" != "" ] ; then
@@ -116,9 +129,9 @@ function printDownloadPercentage {
 # Portable md5 calculator
 # $1 file
 function getMD5 {
-	if [ `uname` = Linux ] ;then
+	if which md5sum &> /dev/null;then
 		MD5SUM=$(md5sum "$1")
-	else # Free BSD
+	else
 		MD5SUM=$(md5 -q "$1")
 	fi
 	echo $MD5SUM | awk '{print $1}'
@@ -303,13 +316,18 @@ END
         chmod +x "$BASEDIR/bin/$1"
 	ln -sf "$BASEDIR/bin/$1" "$BINDIR/$1"
 
-	# Create launcher icon
-	ICON_FILE="$BASEDIR"/ies4linux-$1.desktop
-	cat << END > "$ICON_FILE"
+	if [ "$DARWIN" = "1" ]; then
+		# TODO package for mac
+		echo
+	else
+
+		# Create launcher icon
+		ICON_FILE="$BASEDIR"/ies4linux-$1.desktop
+		cat << END > "$ICON_FILE"
 [Desktop Entry]
 Version=1.0
 Exec=$BINDIR/$1
-Icon=$BASEDIR/ies4linux.svg
+Icon=$BASEDIR/ies4linux.png
 Name=Internet Explorer $2
 GenericName=Web Browser
 Comment=MSIE $2 by IEs4Linux
@@ -318,19 +336,15 @@ Terminal=false
 Type=Application
 Categories=Application;Network;
 END
-
-	# Uses xdg-utils to install icon
-	[ "$DEBUG" = "true" ] && export XDG_UTILS_DEBUG_LEVEL=1
-
-	# Install icon on Desktop
-        if [ "$CREATE_DESKTOP_ICON" = "1" ]; then
-		"$IES4LINUX"/lib/xdg-desktop-icon install --novendor "$ICON_FILE"
+	
+		[ "$DEBUG" = "true" ] && export XDG_UTILS_DEBUG_LEVEL=1
+		if [ "$CREATE_DESKTOP_ICON" = "1" ]; then
+			"$IES4LINUX"/lib/xdg-desktop-icon install --novendor "$ICON_FILE"
+		fi
+		if [ "$CREATE_MENU_ICON" = "1" ]; then
+			"$IES4LINUX"/lib/xdg-desktop-menu install --noupdate --novendor "$ICON_FILE"
+		fi
 	fi
-
-	# Install icon on Menu
-        if [ "$CREATE_MENU_ICON" = "1" ]; then
-		"$IES4LINUX"/lib/xdg-desktop-menu install --noupdate --novendor "$ICON_FILE"
-        fi
 }
 
 function clean_tmp {
