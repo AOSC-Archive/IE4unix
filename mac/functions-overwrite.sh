@@ -42,6 +42,40 @@ function pre_install {
 	fi
 }
 
+# Create all shortcuts: .ies4linux/bin/$1, bin/$1 and Desktop icon
+# $1 excutable name
+# $2 IE version
+function createShortcuts {
+	# On Mac, do not use BINDIR (yet)
+
+	touch "$BASEDIR/$1/.firstrun"
+	rm -f "$BASEDIR/bin/$1"
+	get_start_page $1 firstrun
+	mkdir -p "$BASEDIR/bin"
+
+        cat << END > "$BASEDIR/bin/$1"
+#!/usr/bin/env bash
+# IEs 4 Mac script to run $1 - http://tatanka.com.br/ies4linux
+
+debugPipe() {
+	while read line; do [ "\$DEBUG" = "true" ] && echo \$line; done
+}
+
+cd
+export WINEPREFIX="$BASEDIR/$1"
+
+if [ -f "$BASEDIR/$1/.firstrun" ]; then
+        rm "$BASEDIR/$1/.firstrun"
+        ( open-x11 wine "$BASEDIR/$1/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "${START_PAGE}" 2>&1 ) | debugPipe
+else
+        ( open-x11 wine "$BASEDIR/$1/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "\$@" 2>&1 ) | debugPipe
+fi
+END
+        chmod +x "$BASEDIR/bin/$1"
+
+	# TODO create .app shortcuts
+}
+
 ###############################################################################################################
 # Export all functions so subshells can access them
 for fn in $(grep "^function" "$IES4LINUX"/mac/functions-overwrite.sh | sed -e 's/function[[:space:]]*//g;s/{//g'); do

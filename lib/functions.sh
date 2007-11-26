@@ -354,14 +354,9 @@ END
         chmod +x "$BASEDIR/bin/$1"
 	ln -sf "$BASEDIR/bin/$1" "$BINDIR/$1"
 
-	if [ "$DARWIN" = "1" ]; then
-		# TODO package for mac
-		echo
-	else
-
-		# Create launcher icon
-		ICON_FILE="$BASEDIR"/ies4linux-$1.desktop
-		cat << END > "$ICON_FILE"
+	# Create launcher icon
+	ICON_FILE="$BASEDIR"/ies4linux-$1.desktop
+	cat << END > "$ICON_FILE"
 [Desktop Entry]
 Version=1.0
 Exec=$BINDIR/$1
@@ -375,13 +370,12 @@ Type=Application
 Categories=Application;Network;
 END
 	
-		[ "$DEBUG" = "true" ] && export XDG_UTILS_DEBUG_LEVEL=1
-		if [ "$CREATE_DESKTOP_ICON" = "1" ]; then
-			"$IES4LINUX"/lib/xdg-desktop-icon install --novendor "$ICON_FILE"
-		fi
-		if [ "$CREATE_MENU_ICON" = "1" ]; then
-			"$IES4LINUX"/lib/xdg-desktop-menu install --noupdate --novendor "$ICON_FILE"
-		fi
+	[ "$DEBUG" = "true" ] && export XDG_UTILS_DEBUG_LEVEL=1
+	if [ "$CREATE_DESKTOP_ICON" = "1" ]; then
+		"$IES4LINUX"/lib/xdg-desktop-icon install --novendor "$ICON_FILE"
+	fi
+	if [ "$CREATE_MENU_ICON" = "1" ]; then
+		"$IES4LINUX"/lib/xdg-desktop-menu install --noupdate --novendor "$ICON_FILE"
 	fi
 }
 
