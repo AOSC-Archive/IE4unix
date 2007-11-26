@@ -33,7 +33,7 @@ if [ "$((INSTALLIE6+INSTALLIE55+INSTALLIE5+INSTALLIE7+INSTALLIE1+INSTALLIE2+INST
 fi
 
 # Show what we will do
-section $MSG_INSTALLATION_OPTIONS
+section "$(I) will:"
 	IES=""
 	[ "$INSTALLIE6" = "1" ] && IES="6.0"
 	[ "$INSTALLIE55" = "1" ] && IES="$IES, 5.5"
@@ -55,7 +55,7 @@ ok
 mkdir -p "$BINDIR"       || error $MSG_ERROR_CREATE_FOLDER $BINDIR
 mkdir -p "$BASEDIR/tmp/" || error $MSG_ERROR_CREATE_FOLDER $BASEDIR
 mkdir -p "$DOWNLOADDIR"  || error $MSG_ERROR_CREATE_FOLDER $DOWNLOADDIR
-cp "$IES4LINUX/lib/ies4linux.png" "$BASEDIR"
+cp "$IES4LINUX/lib/ies4linux.png" "$IES4LINUX/lib/ies4linux.svg" "$BASEDIR"
 
 # Download module #############################################################
 
@@ -120,20 +120,8 @@ section $MSG_DOWNLOADING
 	}
 ok
 
-# Download cabextract to darwin ###############################################
-
-if [ "$DARWIN_DOWNLOAD_CABEXTRACT" = "1" ]; then
-	section Getting cabextract
-
-	subsection $MSG_DOWNLOADING_FROM tatanka.com.br:
-		download http://www.tatanka.com.br/ies4mac/downloads/cabextract-1.2-macintel.zip
-	
-	section Extracting cabextract.zip
-		mkdir "$BASEDIR/cabextract"
-		cd "$BASEDIR/cabextract/"
-		unzip -Lqq "$DOWNLOADDIR/cabextract-1.2-macintel.zip"
-		export PATH="$BASEDIR/cabextract/":$PATH
-fi
+# Someone needs to to something before we continue???
+pre_install
 
 # IE6 Installation module #####################################################
 

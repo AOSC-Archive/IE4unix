@@ -20,9 +20,15 @@ elif [ $(uname) = "Linux" ]; then
 	export LINUX=1
 fi
 
+DARWIN=1
+
 # Import functions
-# TODO don't use period operator
 . "$IES4LINUX"/lib/functions.sh
+
+# If it's darwin, overwrite some functions
+if [ "$DARWIN" = "1" ]; then
+	. "$IES4LINUX"/mac/functions-overwrite.sh
+fi
 
 # Initialize Debug module
 [ "$DEBUG" != true ] && DEBUG=false
@@ -62,6 +68,9 @@ export MESSAGE_FILE=enUS
 
 # Script mode: gui, automatic
 export IES4LINUX_MODE="gui"
+
+# Someone can override some variables
+init_variables
 
 # Determine locale and languages
 # We have two methods: $LANG and $(locale)
@@ -104,31 +113,11 @@ export IES4LINUX_MODE="gui"
 }
 
 # Check dependencies for wine, cabextract, wget, unzip ########################
-# TODO find other wines
-which wine &> /dev/null || error $MSG_ERROR_INSTALL_WINE
-which unzip &> /dev/null || error $MSG_ERROR_INSTALL_UNZIP
+find_wine
+find_cabextract
+find_download_program
+find_unzip
 
-# check for cabextract
-if which cabextract &> /dev/null ; then
-	cabextract --version | grep -q "1."   || error $MSG_ERROR_UPDATE_CABEXTRACT
-else
-	if [ "$DARWIN" = "1" ]; then
-		export DARWIN_DOWNLOAD_CABEXTRACT=1
-	else
-		error $MSG_ERROR_INSTALL_CABEXTRACT
-	fi
-fi
-
-# check for wget or curl
-if which wget &> /dev/null; then
-	export HASWGET=1
-elif which curl &> /dev/null; then
-	export HASCURL=1
-else
-	error $MSG_ERROR_INSTALL_WGET
-fi
-
-wine --version 2>&1  | grep -q "0.9." || warning $MSG_WARNING_OLDWINE
 [ "$(whoami)" = "root" ] && warning $MSG_WARNING_ROOT
 
 # Configure options ###########################################################

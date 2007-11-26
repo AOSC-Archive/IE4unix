@@ -1,7 +1,4 @@
-
-
-
-# IEs4Linux - Copyright Sergio Lopes
+# IEs4Linux
 # Functions needed everywhere.
 # All functions *should* be declared using 'function' keyword.
 # All global variables used by functions should have function name in their name.
@@ -20,6 +17,45 @@ function debugPipe {
 	while read line; do
 		debug $line
 	done
+}
+
+# INIT MODULE #################################################################
+
+function init_variables {
+	export LINUX=1
+}
+
+# Find where wine is
+function find_wine {
+	which wine &> /dev/null || error $MSG_ERROR_INSTALL_WINE
+	wine --version 2>&1  | grep -q "0.9." || warning $MSG_WARNING_OLDWINE
+}
+
+# check for cabextract
+function find_cabextract {
+	which cabextract &> /dev/null || error $MSG_ERROR_INSTALL_CABEXTRACT
+	cabextract --version | grep -q "1."   || error $MSG_ERROR_UPDATE_CABEXTRACT
+	export DARWIN_DOWNLOAD_CABEXTRACT=1
+}
+
+# check for wget or curl
+function find_download_program {
+	if which wget &> /dev/null; then
+		export HASWGET=1
+	elif which curl &> /dev/null; then
+		export HASCURL=1
+	else
+		error $MSG_ERROR_INSTALL_WGET
+	fi
+}
+
+function find_unzip {
+	which unzip &> /dev/null || error "$(I) couldn't find unzip"
+}
+
+function pre_install {
+	# do nothing
+	echo a > /dev/null
 }
 
 # DOWNLOAD MODULE #############################################################
@@ -41,12 +77,13 @@ function download {
 	# Download file if (1) doesn't exist or (2) download was interrupted before
 	if [ ! -f "$file" ] || [ "$(getFileSize "$file")" -lt "$((correctsize + 0))" ]; then
 		printDownloadPercentage $FILENAME 0
-
 		touch "$file"
+
+		local useragent="Mozilla/4.0 (compatible; MSIE 6.0; Windows 98)"
 		if [ "$HASWGET" = "1" ]; then
-			pid=$(wget -q -b -o /dev/null $URL $WGETFLAGS -O "$file" | sed -e 's/[^0-9]//g')
+			pid=$(wget -q -b -t 1 -T 5 -U "$useragent" -o /dev/null $URL $WGETFLAGS -O "$file" | sed -e 's/[^0-9]//g')
 		elif [ "$HASCURL" = "1" ]; then
-			( curl -s "$URL" -o "$file" & )
+			( curl -s -A "$useragent" "$URL" -o "$file" & )
 			pid=$(ps | grep curl | head -n 1 | awk '{print $1}' )
 		else
 			error no download program!
@@ -148,7 +185,7 @@ function getFileSize {
 	}
 
 	wc '-c' "$1" &> '/dev/null' && {
-		wc '-c' "$1"http://projects.ee.bgu.ac.il/
+		wc '-c' "$1"
 		return 0
 	}
 
@@ -168,11 +205,12 @@ function getFileSize {
 # Download something from Evolt, with mirror selection
 # $1 Evolt path
 function downloadEvolt {
-	local EVOLT_MIRROR1=http://www.mirrorservice.org/sites/browsers.evolt.org/browsers
+	local EVOLT_MIRROR1=http://www.mirrorservice.org/sites/browsers.evolt.org/browsersa
 	local EVOLT_MIRROR2=http://planetmirror.com/pub/browsers
 	local EVOLT_MIRROR3=http://download.mirror.ac.uk/mirror/ftp.evolt.org
 
 	if ! download $EVOLT_MIRROR1/$1 ; then
+		echo -ne "\r "
 		debug Trying Evolt Mirror 2
 		if ! download $EVOLT_MIRROR2/$1 ; then
 			debug Trying Evolt Mirror 3
@@ -360,6 +398,11 @@ function create_temp_file {
 
 # OUTPUT MODULE ###############################################################
 
+function I {
+	debug "Hi, I'm Linux"
+	echo IEs4Linux
+}
+
 # Functions to print things
 function warning {
 	if [ $NOCOLOR = 0 ]; then
@@ -418,11 +461,6 @@ function run_ie {
 		local l=$BINDIR/ie$1
 		echo " ${l//\/\//\/}"
 	fi
-}
-
-#Used by Hebrew locale
-function bidi {
-	echo "$1" | fribidi --rtl | perl -e 'while(<>){ print "$1\\n" if /(.*)/;}'
 }
 
 ###############################################################################
