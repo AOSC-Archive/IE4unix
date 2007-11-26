@@ -10,7 +10,7 @@ function I {
 }
 
 function init_variables {
-	export BASEDIR="$HOME/Applications/IEs 4 Mac/"
+	export BASEDIR="$HOME/Applications/IEs 4 Mac/.ies4mac"
 	export BINDIR="$BASEDIR/bin"
 	export IES4LINUX_MODE="automatic"
 	export DARWIN_DOWNLOAD_CABEXTRACT=0
@@ -19,7 +19,8 @@ function init_variables {
 function find_wine {
 	WINEHOME=$("$IES4LINUX"/mac/whereiswine.sh)
 	[ "$WINEHOME" = "" ] && error "$(I) couldn't find wine or darwine"
-	export PATH=$WINEHOME:$PATH
+	export PATH="$WINEHOME":$PATH
+	export WINEHOME
 	wine --version 2>&1  | grep -q "0.9." || warning $MSG_WARNING_OLDWINE
 }
 
@@ -31,15 +32,30 @@ function pre_install {
 	# Download cabextract to darwin ###############################################
 	if [ "$DARWIN_DOWNLOAD_CABEXTRACT" = "1" ]; then
 		section Getting cabextract
+		
 		subsection $MSG_DOWNLOADING_FROM tatanka.com.br:
 			download http://www.tatanka.com.br/ies4mac/downloads/cabextract-1.2-macintel.zip
+		
 		subsection Extracting cabextract.zip
+			rm -rf "$BASEDIR/cabextract"
 			mkdir "$BASEDIR/cabextract"
 			cd "$BASEDIR/cabextract/"
 			unzip -Lqq "$DOWNLOADDIR/cabextract-1.2-macintel.zip"
 			export PATH="$BASEDIR/cabextract/":$PATH
+			which cabextract &> /dev/null || error "Download cabextract didn't work"
 		ok
 	fi
+}
+
+function getFileSize {
+	ls -laF "$1" | awk '{print $5}'
+	return 0
+}
+
+# Darwin does not have pidof, so we make a ingenue one
+# $1 program to look for
+function pidof {
+	ps | grep "$1" | head -n 1 | awk '{print $1}'
 }
 
 # Create all shortcuts: .ies4linux/bin/$1, bin/$1 and Desktop icon
@@ -62,13 +78,15 @@ debugPipe() {
 }
 
 cd
+export PATH="$PATH"
 export WINEPREFIX="$BASEDIR/$1"
+open-x11
 
 if [ -f "$BASEDIR/$1/.firstrun" ]; then
         rm "$BASEDIR/$1/.firstrun"
-        ( open-x11 wine "$BASEDIR/$1/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "${START_PAGE}" 2>&1 ) | debugPipe
+        ( wine "$BASEDIR/$1/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "${START_PAGE}" 2>&1 ) | debugPipe
 else
-        ( open-x11 wine "$BASEDIR/$1/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "\$@" 2>&1 ) | debugPipe
+        ( wine "$BASEDIR/$1/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "\$@" 2>&1 ) | debugPipe
 fi
 END
         chmod +x "$BASEDIR/bin/$1"

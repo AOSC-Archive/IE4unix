@@ -19,6 +19,11 @@ function debugPipe {
 	done
 }
 
+function isNotDebug {
+	[ "$DEBUG" = "true"  ] && return 0
+	return 1
+}
+
 # INIT MODULE #################################################################
 
 function init_variables {
@@ -84,12 +89,13 @@ function download {
 			pid=$(wget -q -b -t 1 -T 5 -U "$useragent" -o /dev/null $URL $WGETFLAGS -O "$file" | sed -e 's/[^0-9]//g')
 		elif [ "$HASCURL" = "1" ]; then
 			( curl -s -A "$useragent" "$URL" -o "$file" & )
-			pid=$(ps | grep curl | head -n 1 | awk '{print $1}' )
+			pid="$(pidof curl)"
 		else
 			error no download program!
 		fi
-
-		while ps --pid $pid &> /dev/null; do
+		debug Download PID=$pid
+		
+		while ps -p $pid | grep $pid &> /dev/null; do
 			if [ "$correctsize" != "" ];then
 				du=$(getFileSize "$file")
 				percent=$(( 100 * $du / $correctsize ))
@@ -102,7 +108,7 @@ function download {
 
 		# After wget ends, see if (1) 404 or (2) stoped
 		local finalsize=$(getFileSize "$file")
-		if [ "$finalsize" = 0 ]; then
+		if [ "$finalsize" = "0" ]; then
 			debug File $FILENAME not found
 			rm "$file"
 			return 1
