@@ -46,6 +46,7 @@ section "$(I) will:"
 	subsection - $MSG_OPTION_LOCALE	 $IE6_LOCALE
 
 	[ "$INSTALLFLASH" = "1" ] && subsection - $MSG_OPTION_INSTALL_FLASH
+	[ "$INSTALLCOREFONTS" = "1" ] && subsection - Install MS Core Fonts
 	[ "$CREATE_ICON" = "1"  ] && subsection - $MSG_OPTION_CREATE_ICONS
 	subsection - $MSG_OPTION_BASEDIR $BASEDIR
 	#subsection - $MSG_OPTION_DOWNLOADDIR $DOWNLOADDIR
@@ -504,7 +505,7 @@ kill_wineserver
 cd "$IES4LINUX" && rm -rf "$BASEDIR/tmp"
 post_install
 
-section $MSG_INSTALLATIONS_FINISHED
+section "$(I) installations finished!"
 
 # Show user how to run her IEs
 echo

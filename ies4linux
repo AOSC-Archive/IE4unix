@@ -45,9 +45,9 @@ export INSTALLIE15=0
 export INSTALLIE1=0
 
 export INSTALLFLASH=1
-export INSTALLCOREFONTS=1
+export INSTALLCOREFONTS=0
 export CREATE_DESKTOP_ICON=1
-export CREATE_MENU_ICON=1
+export CREATE_MENU_ICON=0
 
 export BASEDIR="$HOME/.ies4linux"
 export BINDIR="$HOME/bin"
@@ -137,6 +137,7 @@ while [ $# -gt 0 ]; do
 	--no-flash)         export INSTALLFLASH=0;  shift ;;
 	--no-desktop-icon)  export CREATE_DESKTOP_ICON=0;   shift ;;
 	--no-menu-icon)     export CREATE_MENU_ICON=0;   shift ;;
+	--install-corefonts) export INSTALLCOREFONTS=1; shift ;;
 	
 	--basedir)          export BASEDIR="$2";     shift 2 ;;
 	--bindir)           export BINDIR="$2";      shift 2 ;;
