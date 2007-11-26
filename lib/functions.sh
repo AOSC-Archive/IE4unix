@@ -62,6 +62,15 @@ function pre_install {
 	# do nothing
 	echo a > /dev/null
 }
+function post_install {
+	# Updates user menu
+	# [ "$CREATE_MENU_ICON" = "1" ] && "$IES4LINUX"/lib/xdg-desktop-menu forceupdate
+	echo a > /dev/null
+}
+
+function uninstall {
+	bash "$IES4LINUX"/lib/uninstall.sh
+}
 
 # DOWNLOAD MODULE #############################################################
 
@@ -380,9 +389,10 @@ END
 	if [ "$CREATE_DESKTOP_ICON" = "1" ]; then
 		"$IES4LINUX"/lib/xdg-desktop-icon install --novendor "$ICON_FILE"
 	fi
-	if [ "$CREATE_MENU_ICON" = "1" ]; then
-		"$IES4LINUX"/lib/xdg-desktop-menu install --noupdate --novendor "$ICON_FILE"
-	fi
+	# menu creation is disabled
+	#if [ "$CREATE_MENU_ICON" = "1" ]; then
+	#	"$IES4LINUX"/lib/xdg-desktop-menu install --noupdate --novendor "$ICON_FILE"
+	#fi
 }
 
 function clean_tmp {

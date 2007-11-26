@@ -11,7 +11,7 @@ function I {
 
 function init_variables {
 	export BASEDIR="$HOME/Applications/IEs 4 Mac/.ies4mac"
-	export BINDIR="$BASEDIR/bin"
+	export BINDIR="$HOME/Applications/IEs 4 Mac/"
 	export IES4LINUX_MODE="automatic"
 	export DARWIN_DOWNLOAD_CABEXTRACT=0
 }
@@ -90,8 +90,17 @@ else
 fi
 END
         chmod +x "$BASEDIR/bin/$1"
+	ln -sf "$BASEDIR/bin/$1" "$BINDIR/$1"
 
 	# TODO create .app shortcuts
+}
+
+function post_install {
+	rm -rf "$BASEDIR/cabextract"
+}
+
+function uninstall {
+	error To uninstall on Mac OS X, just remove the 'IEs 4 Mac' folder at /Applications
 }
 
 ###############################################################################################################

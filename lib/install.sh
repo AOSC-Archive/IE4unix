@@ -65,7 +65,7 @@ section $MSG_DOWNLOADING
 	# Basic downloads for IE6
 	URL_IE6_CABS=http://download.microsoft.com/download/ie6sp1/finrel/6_sp1/W98NT42KMeXP
 	IE6_CABS="ADVAUTH CRLUPD HHUPD IEDOM IE_EXTRA IE_S1 IE_S2 IE_S5 IE_S4 IE_S3 IE_S6 SETUPW95 FONTCORE FONTSUP VGX"
-	# other possible cabs BRANDING GSETUP95 IEEXINST README SWFLASH SCR56EN
+	# other possible cabs BRANDING GSETUP95 IEEXINST README SWFLASH (SCR56EN)
 
 	# All MS downloads
 	subsection $MSG_DOWNLOADING_FROM microsoft.com:
@@ -502,10 +502,7 @@ fi
 # Post install
 kill_wineserver
 cd "$IES4LINUX" && rm -rf "$BASEDIR/tmp"
-rm -rf "$BASEDIR/cabextract/"
-
-# Updates user menu
-"$IES4LINUX"/lib/xdg-desktop-menu forceupdate
+post_install
 
 section $MSG_INSTALLATIONS_FINISHED
 

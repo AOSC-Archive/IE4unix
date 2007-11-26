@@ -20,8 +20,6 @@ elif [ $(uname) = "Linux" ]; then
 	export LINUX=1
 fi
 
-DARWIN=1
-
 # Import functions
 . "$IES4LINUX"/lib/functions.sh
 
@@ -53,7 +51,7 @@ export CREATE_MENU_ICON=1
 
 export BASEDIR="$HOME/.ies4linux"
 export BINDIR="$HOME/bin"
-export WGETFLAGS="-t 2 -c "
+export WGETFLAGS="-c "
 export DOWNLOADDIR_SUFFIX="downloads"
 export DOWNLOADDIR="$BASEDIR/$DOWNLOADDIR_SUFFIX"
 
@@ -153,9 +151,8 @@ while [ $# -gt 0 ]; do
 		shift
 		;;
 	
-
 	--uninstall)
-		bash "$IES4LINUX"/lib/uninstall.sh
+		uninstall
 		exit 0
 		;;
 	--locale)
@@ -221,8 +218,6 @@ if [ "$IES4LINUX_MODE" = "gui" ]; then
 		bash ui/pygtk/python-gtk.sh
 	elif [ "$PREFERRED_GUI" = "kommander" ] && [ "$haskmdr" = "0" ]; then
 		bash ui/kommander/kommander.sh
-	elif [ "$PREFERRED_GUI" = "terminal" ]; then
-		bash ui/terminal.sh
 	else
 		if [ "$haspygtk" = "0" ] && [ "$haskmdr" = "0" ]; then
 			if  [ "$KDE_FULL_SESSION" = "true" ]; then
@@ -235,7 +230,7 @@ if [ "$IES4LINUX_MODE" = "gui" ]; then
 		elif [ "$haskmdr" = "0" ]; then
 			bash ui/kommander/kommander.sh
 		else
-			warning $MSG_NO_GUI_AVAILABLE
+			warning $MSG_ERROR_NO_GUI_AVAILABLE
 			./ies4linux --help
 		fi
 	fi
