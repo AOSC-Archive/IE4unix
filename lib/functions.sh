@@ -220,7 +220,7 @@ function getFileSize {
 # Download something from Evolt, with mirror selection
 # $1 Evolt path
 function downloadEvolt {
-	local EVOLT_MIRROR1=http://www.mirrorservice.org/sites/browsers.evolt.org/browsersa
+	local EVOLT_MIRROR1=http://www.mirrorservice.org/sites/browsers.evolt.org/browsers
 	local EVOLT_MIRROR2=http://planetmirror.com/pub/browsers
 	local EVOLT_MIRROR3=http://download.mirror.ac.uk/mirror/ftp.evolt.org
 
