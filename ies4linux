@@ -64,9 +64,6 @@ export NOCOLOR=0
 export GUESSED_IE6_LOCALE=EN-US
 export MESSAGE_FILE=enUS
 
-# Script mode: gui, automatic
-export IES4LINUX_MODE="gui"
-
 # Someone can override some variables
 init_variables
 
@@ -188,7 +185,7 @@ while [ $# -gt 0 ]; do
 		;;
 	esac
 done
-	
+
 # Hack for downloaddir
 if [ "$changeddownloaddir" != "1" ]; then
 	DOWNLOADDIR="$BASEDIR/$DOWNLOADDIR_SUFFIX"
@@ -204,51 +201,12 @@ else
 	IE6_LOCALE=$GUESSED_IE6_LOCALE
 fi
 
-# Run installer ###############################################################
-
-# If mode=gui, let user configure some options
-if [ "$IES4LINUX_MODE" = "gui" ]; then
-
-	# Decide what UI to run
-	haspygtk=$(python -c "import pygtk; pygtk.require('2.0'); import gtk" &> /dev/null; echo $?)
-	haskmdr=$(kmdr-executor -v &> /dev/null; echo $?)
-
-	cd "$IES4LINUX"
-	
-	if [ "$PREFERRED_GUI" = "gtk" ] && [ "$haspygtk" = "0" ]; then
-		bash ui/pygtk/python-gtk.sh
-	elif [ "$PREFERRED_GUI" = "kommander" ] && [ "$haskmdr" = "0" ]; then
-		bash ui/kommander/kommander.sh
-	else
-		if [ "$haspygtk" = "0" ] && [ "$haskmdr" = "0" ]; then
-			if  [ "$KDE_FULL_SESSION" = "true" ]; then
-				bash ui/kommander/kommander.sh
-			else
-				bash ui/pygtk/python-gtk.sh
-			fi
-		elif [ "$haspygtk" = "0" ]; then
-			bash ui/pygtk/python-gtk.sh
-		elif [ "$haskmdr" = "0" ]; then
-			bash ui/kommander/kommander.sh
-		else
-			warning $MSG_ERROR_NO_GUI_AVAILABLE
-			./ies4linux --help
-		fi
-	fi
-
-# 	if [ "$?" = "1" ]; then
-# 		warning $MSG_NO_GUI_AVAILABLE
-# 		./ies4linux --help
-# 	fi
-
-elif [ "$IES4LINUX_MODE" = "automatic" ]; then
-	bash "$IES4LINUX"/lib/install.sh
-fi
-
-cd
+# Run installer #
+bash "$IES4LINUX"/lib/install.sh
 
 # Remove temp dir
 cd "$IES4LINUX" && rm -rf "$HOME/.ies4linux/tmp"
 
 # Remove ~/.ies4linux if its empty now
 rmdir "$HOME/.ies4linux" &> /dev/null
+
