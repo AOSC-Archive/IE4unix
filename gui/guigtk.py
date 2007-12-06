@@ -166,7 +166,8 @@ class GUI:
 		elif line[0:3] == '!! ':
 			tag = self.error_tag
 			line = line[2:]
-				
+		
+		# TODO make safer thread access
 		# Delete last line if it is \r
 		if self.remove_next_line and line != '\n':
 			it = self.textbuffer.get_iter_at_line(self.textbuffer.get_line_count()-2)

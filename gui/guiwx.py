@@ -17,9 +17,9 @@ class GUI:
 		
 	def doInstaller(self, model):
 		self.model = model
+		self.app = wx.App()
 		
-		# Start application
-		app = wx.App()
+		# Create Window
 		self.window = wx.Frame(None, title=model.title, size=(_width, _height))
 		window_box = wx.BoxSizer(wx.VERTICAL)
 		self.window.SetSizer(window_box)
@@ -49,8 +49,9 @@ class GUI:
 			but_box.Add(but, 1, wx.EXPAND)
 	
 		# Show everything
+		self.window.Centre()
 		self.window.Show()
-		app.MainLoop()
+		self.app.MainLoop()
 
 	# Configure one tab
 	def _do_tab(self, container, tab):
@@ -147,3 +148,34 @@ class GUI:
 	def doExecutor(self, e):
 		self.window.Hide()
 		
+		# Create Window
+		self.window = wx.Frame(None, title=e.title, size=(_width*1.8, _height*1.3))
+		window_box = wx.BoxSizer(wx.VERTICAL)
+		self.window.SetSizer(window_box)
+		
+		# Add logo
+		logoBitmap = wx.Image(e.logo, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+		logo = wx.StaticBitmap(self.window, -1, logoBitmap)
+		window_box.Add(logo, 0, wx.CENTER, border=5)
+
+		# Add console
+		self.console = wx.TextCtrl(self.window, -1, size=(self.window.GetSize()[0] -4, 100) , style=wx.TE_MULTILINE|wx.TE_READONLY| wx.HSCROLL |wx.TE_PROCESS_ENTER | wx.TE_RICH2)
+		window_box.Add(self.console, 15, wx.CENTER, border=5)
+
+		#Add buttons
+		but_box = wx.BoxSizer(wx.HORIZONTAL)
+		window_box.Add(but_box, 1, wx.EXPAND)
+		for button in e.buttons:
+			but = wx.Button(self.window, label=button.label)
+			but.pmodel = button
+			but.Bind(wx.EVT_BUTTON, self.callback_button)
+			but_box.Add(but, 1, wx.EXPAND)
+	
+		# Show everything
+		self.window.Centre()
+		self.window.Show()
+
+	def write_command_line(self, line):
+		# TODO make it richer
+		wx.CallAfter(self.console.AppendText, line)
+

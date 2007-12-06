@@ -5,28 +5,37 @@ class InstallerDefinition:
 		self.tabs = []
 		self.buttons = []
 	
-	def title(self, title):
+	def set_title(self, title):
 		self.title = title
 		return self
 
-	def subtitle(self, subtitle):
+	def set_subtitle(self, subtitle):
 		self.subtitle = subtitle
 		return self
 
-	def logo(self, logo):
+	def set_logo(self, logo):
 		#TODO validates file existence
 		self.logo = logo
 		return self
 		
-	def tab(self, label):
+	def tab(self, label, show = True):		
 		tab = _Tab(label, self)
-		self.tabs.append(tab)
+		if show:
+			self.tabs.append(tab)
 		return tab
 		
 	def button(self, label, img, callback):
 		button = _Button(label, img, callback)
 		self.buttons.append(button)
 		return self
+
+	def ignore_platform(self):
+		_res = False
+		if self.platform == 'mac':
+			_res = True
+			
+		self.platform = 'all'
+		return _res
 		
 	# iteration
 	def checkboxes(self):
@@ -59,11 +68,11 @@ class _Tab:
 		self.program = program
 		self.groups = []
 		
-	def toptext(self, text):
+	def toptext(self, text, platform='all'):
 		self.text = text
 		return self
 	
-	def group(self, label):
+	def group(self, label, platform='all'):
 		group = _Group(label, self)
 		self.groups.append(group)
 		return group
@@ -80,17 +89,17 @@ class _Group:
 		self.textfields = []
 		self.orientation = 'vertical'
 
-	def checkbox(self, label, command, checked=False):
+	def checkbox(self, label, command, checked=False, platform='all'):
 		checkbox = _CheckBox(label, command, checked, self)
 		self.checkboxes.append(checkbox)
 		return self
 		
-	def combobox(self, label, options, command, selected):
+	def combobox(self, label, options, command, selected, platform='all'):
 		combo = _ComboBox(label, options, command, selected)
 		self.comboboxes.append(combo)
 		return self
 		
-	def textfield(self, label, value, command):
+	def textfield(self, label, value, command, platform='all'):
 		t = _TextField(label, value, command)
 		self.textfields.append(t)
 		return self
@@ -132,3 +141,4 @@ class _Button:
 		self.label = label
 		self.img = img
 		self.callback = callback
+		
