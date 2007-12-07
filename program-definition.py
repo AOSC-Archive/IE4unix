@@ -80,6 +80,7 @@ def callback_install():
 	
 	# execute process thread
 	p = process.ProcessThread(e, g.write_command_line)
+	g.process = p
 	p.start_program()
 
 def callback_quit():
@@ -98,6 +99,7 @@ def MakeTheExecutor(program):
 	
 # Callbacks
 def callback_cancel():
+	g.process.kill()
 	g.quit()
 	sys.exit(0)
 

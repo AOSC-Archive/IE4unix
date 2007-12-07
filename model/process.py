@@ -15,9 +15,9 @@ class ProcessThread:
 		command.extend(self.executor.args)
 	
 		(stdout, stdin) = popen2.popen4(command)
+		self.pid = int(os.popen("ps x | grep bash | grep ies4linux | head -n 1 | awk '{print $1}'").read())
 		
 		self.process_finished = False
-		
 		line = ''
 		while not self.process_finished:
 			char = stdout.read(1)
@@ -31,4 +31,9 @@ class ProcessThread:
 				self.process_finished = True
 				
 		self.write_line_callback(line + '\n')
+
+	def kill(self):
+		self.process_finished = True
+		self.process_interrupted = True
+		os.kill(self.pid, 9)
 

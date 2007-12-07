@@ -149,7 +149,7 @@ class GUI:
 		self.window.Hide()
 		
 		# Create Window
-		self.window = wx.Frame(None, title=e.title, size=(_width*1.8, _height*1.3))
+		self.window = wx.Frame(None, title=e.title, size=(400, 450))
 		window_box = wx.BoxSizer(wx.VERTICAL)
 		self.window.SetSizer(window_box)
 		
@@ -158,9 +158,13 @@ class GUI:
 		logo = wx.StaticBitmap(self.window, -1, logoBitmap)
 		window_box.Add(logo, 0, wx.CENTER, border=5)
 
+		# Console control variables
+		self.remove_next_line = False
+		self.last_line_position = -1
+
 		# Add console
 		self.console = wx.TextCtrl(self.window, -1, size=(self.window.GetSize()[0] -4, 100) , style=wx.TE_MULTILINE|wx.TE_READONLY| wx.HSCROLL |wx.TE_PROCESS_ENTER | wx.TE_RICH2)
-		window_box.Add(self.console, 15, wx.CENTER, border=5)
+		window_box.Add(self.console, 12, wx.CENTER, border=5)
 
 		#Add buttons
 		but_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -176,6 +180,37 @@ class GUI:
 		self.window.Show()
 
 	def write_command_line(self, line):
-		# TODO make it richer
-		wx.CallAfter(self.console.AppendText, line)
+		wx.CallAfter(self.wx_write_command_line, line)
+		
+	def wx_write_command_line(self, line):
+	
+		# Delete last line if it is \r
+		if self.remove_next_line and line != '\n':
+			self.console.Remove(self.last_line_position, self.console.GetLastPosition())
+			self.remove_next_line = False
+
+		# Double spaces
+		if line[0:2] == '  ': line = "  " + line
+		elif line[0:1] == ' ': line = " " + line
+	
+		# Detect styles
+		style = self.console.GetDefaultStyle()
+		bold = style.GetFont()
+		bold.SetWeight(wx.FONTWEIGHT_BOLD)
+		if line[0:2] == '# ':
+			style = wx.TextAttr("BLACK", wx.NullColour, bold)
+			line = line[2:]
+		elif line == "[ OK ]\n":
+			style = wx.TextAttr("BLUE", wx.NullColour, bold)
+		elif line[0:3] == '!! ':
+			style = wx.TextAttr("RED", wx.NullColour, bold)
+			line = line[2:]
+	
+		# Save last position, write, apply style
+		self.last_line_position = self.console.GetLastPosition()
+		self.console.AppendText(line)
+		self.console.SetStyle(self.last_line_position, self.console.GetLastPosition(), style)
+				
+		if line[-1] == '\r': 
+			self.remove_next_line = True
 
