@@ -1,4 +1,5 @@
 import gtk, pango, sys, os
+gtk.threads_init()
 
 # PyGTK GUI implementation
 class GUI:
@@ -153,7 +154,6 @@ class GUI:
 
 		# Show everything
 		self.window.show_all()
-		gtk.gdk.threads_init()
 
 	def write_command_line(self, line):
 		# What tag to use
@@ -167,7 +167,9 @@ class GUI:
 			tag = self.error_tag
 			line = line[2:]
 		
-		# TODO make safer thread access
+		# Safe GTK thread
+		gtk.threads_enter()
+		
 		# Delete last line if it is \r
 		if self.remove_next_line and line != '\n':
 			it = self.textbuffer.get_iter_at_line(self.textbuffer.get_line_count()-2)
@@ -177,6 +179,9 @@ class GUI:
 		# Insert text and relocate scroll
 		self.textbuffer.insert_with_tags(self.textbuffer.get_end_iter(), line, tag)
 		self.textview.scroll_to_iter(self.textbuffer.get_end_iter(), 0)
+
+		# Safe GTK Thread
+		gtk.threads_leave()
 		
 		if line[-1] == '\r': self.remove_next_line = True
 
