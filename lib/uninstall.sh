@@ -8,6 +8,8 @@
 # uninstall.sh
 #	Removes a previous IEs4Linux installation
 
+# TODO review this
+
 # Checks for installation data
 if [ ! -f "$HOME"/.ies4linux/install.data ]; then
 	error $MSG_ERROR_NO_INSTALL_DATA

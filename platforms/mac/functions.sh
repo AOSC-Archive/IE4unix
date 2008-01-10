@@ -10,30 +10,22 @@ function I {
 }
 
 function init_variables {
+	export DARWIN=1
+	export PLATFORM="mac"
+	export TMPDIR="/tmp/ies4linux"
+	
 	export BASEDIR="$HOME/Applications/IEs 4 Mac/.ies4mac"
 	export BINDIR="$HOME/Applications/IEs 4 Mac/"
 	export IES4LINUX_MODE="automatic"
 	export DARWIN_DOWNLOAD_CABEXTRACT=0
 }
 
-function find_wine {
-	WINEHOME=$("$IES4LINUX"/mac/whereiswine.sh)
-	[ "$WINEHOME" = "" ] && error "$(I) couldn't find wine or darwine"
-	export PATH="$WINEHOME":$PATH
-	export WINEHOME
-	wine --version 2>&1  | grep -q "0.9." || warning $MSG_WARNING_OLDWINE
-}
-
-function find_cabextract {
-	which cabextract &> /dev/null || export DARWIN_DOWNLOAD_CABEXTRACT=1
-}
-
 function pre_install {
-	# Download cabextract to darwin ###############################################
+	# Download cabextract to darwin #
 	if [ "$DARWIN_DOWNLOAD_CABEXTRACT" = "1" ]; then
 		section Getting cabextract
 		
-		subsection $MSG_DOWNLOADING_FROM tatanka.com.br:
+		subsection Downloading from tatanka.com.br:
 			download http://www.tatanka.com.br/ies4mac/downloads/cabextract-1.2-macintel.zip
 		
 		subsection Extracting cabextract.zip
@@ -47,15 +39,14 @@ function pre_install {
 	fi
 }
 
-function getFileSize {
-	ls -laF "$1" | awk '{print $5}'
-	return 0
-}
-
-# Darwin does not have pidof, so we make a ingenue one
-# $1 program to look for
-function pidof {
-	ps | grep "$1" | head -n 1 | awk '{print $1}'
+# $1 ie version
+# $2 (optional) firstrun
+function get_start_page {
+	local url="http://www.tatanka.com.br/ies4mac/startpage?lang=$TRANSLATION_LOCALE&ieversion=$1"
+	if [ "$2" = "firstrun" ]; then
+		url="$url&firstrun=true"
+	fi
+	export START_PAGE="$url"
 }
 
 # Create all shortcuts: .ies4linux/bin/$1, bin/$1 and Desktop icon
@@ -71,7 +62,7 @@ function createShortcuts {
 
         cat << END > "$BASEDIR/bin/$1"
 #!/usr/bin/env bash
-# IEs 4 Mac script to run $1 - http://tatanka.com.br/ies4linux
+# IEs 4 Mac script to run $1 - http://tatanka.com.br/ies4mac
 
 debugPipe() {
 	while read line; do [ "\$DEBUG" = "true" ] && echo \$line; done
@@ -80,6 +71,8 @@ debugPipe() {
 cd
 export PATH="$PATH"
 export WINEPREFIX="$BASEDIR/$1"
+
+# TODO do we need that?
 open-x11
 
 if [ -f "$BASEDIR/$1/.firstrun" ]; then
@@ -99,12 +92,28 @@ function post_install {
 	rm -rf "$BASEDIR/cabextract"
 }
 
-function uninstall {
-	error To uninstall on Mac OS X, just remove the 'IEs 4 Mac' folder at /Applications
+
+### Overwrite some functions
+function find_wine {
+	WINEHOME=$("$PLATFORMDIR"/whereiswine.sh)
+	[ "$WINEHOME" = "" ] && error "$(I) couldn't find wine or darwine"
+	export PATH="$WINEHOME":$PATH
+	export WINEHOME
+	wine --version 2>&1  | grep -q "0.9." || warning Your wine is too old. Please update it.
 }
 
-###############################################################################################################
-# Export all functions so subshells can access them
-for fn in $(grep "^function" "$IES4LINUX"/mac/functions-overwrite.sh | sed -e 's/function[[:space:]]*//g;s/{//g'); do
-	export -f $fn
-done
+function find_cabextract {
+	which cabextract &> /dev/null || export DARWIN_DOWNLOAD_CABEXTRACT=1
+}
+
+function getFileSize {
+	ls -laF "$1" | awk '{print $5}'
+	return 0
+}
+
+# Darwin does not have pidof, so we make a ingenue one
+# $1 program to look for
+function pidof {
+	ps | grep "$1" | head -n 1 | awk '{print $1}'
+}
+

@@ -25,12 +25,7 @@
 #	- Install IE 2.0
 #	- Show user how to run installed IEs
 
-# Inialitazion module #########################################################
-
-# See if user chose at least one IE
-if [ "$((INSTALLIE6+INSTALLIE55+INSTALLIE5+INSTALLIE7+INSTALLIE1+INSTALLIE2+INSTALLIE15))" = "0" ]; then
-	exit 0
-fi
+### Initialization module ###
 
 # Show what we will do
 section "$(I) will:"
@@ -42,26 +37,26 @@ section "$(I) will:"
 	[ "$INSTALLIE15"  = "1" ] && IES="$IES, 1.5"
 	[ "$INSTALLIE2"  = "1" ] && IES="$IES, 2.0"
 	[ "$INSTALLIE7"  = "1" ] && IES="$IES, 7.0"
-	subsection - $MSG_OPTION_INSTALL_IES $IES
-	subsection - $MSG_OPTION_LOCALE	 $IE6_LOCALE
+	subsection - Install Internet Explorers: $IES
+	subsection - Using IE locale: $IE6_LOCALE
 
-	[ "$INSTALLFLASH" = "1" ] && subsection - $MSG_OPTION_INSTALL_FLASH
+	[ "$INSTALLFLASH" = "1" ] && subsection - Install Adobe Flash 9.0
 	[ "$INSTALLCOREFONTS" = "1" ] && subsection - Install MS Core Fonts
-	[ "$CREATE_ICON" = "1"  ] && subsection - $MSG_OPTION_CREATE_ICONS
-	subsection - $MSG_OPTION_BASEDIR $BASEDIR
+	[ "$CREATE_ICON" = "1"  ] && subsection - Create Desktop icons
+	subsection - Install everything at: $BASEDIR
 	#subsection - $MSG_OPTION_DOWNLOADDIR $DOWNLOADDIR
 ok
 
 # Prepare folders
-mkdir -p "$BINDIR"       || error $MSG_ERROR_CREATE_FOLDER $BINDIR
-mkdir -p "$BASEDIR/tmp/" || error $MSG_ERROR_CREATE_FOLDER $BASEDIR
-mkdir -p "$DOWNLOADDIR"  || error $MSG_ERROR_CREATE_FOLDER $DOWNLOADDIR
-cp "$IES4LINUX/lib/ies4linux.png" "$IES4LINUX/lib/ies4linux.svg" "$BASEDIR"
+mkdir -p "$BINDIR"       || error "$(I) couldn't create folder $BINDIR"
+mkdir -p "$BASEDIR/tmp/" || error "$(I) couldn't create folder $BASEDIR"
+mkdir -p "$DOWNLOADDIR"  || error "$(I) couldn't create folder $DOWNLOADDIR"
+cp "$PLATFORMDIR/logo.png" "$BASEDIR"
 
-# Download module #############################################################
+### Download module ###
 
 # Download all files first
-section $MSG_DOWNLOADING
+section Downloading everything we need
 
 	# Basic downloads for IE6
 	URL_IE6_CABS=http://download.microsoft.com/download/ie6sp1/finrel/6_sp1/W98NT42KMeXP
@@ -69,7 +64,7 @@ section $MSG_DOWNLOADING
 	# other possible cabs BRANDING GSETUP95 IEEXINST README SWFLASH (SCR56EN)
 
 	# All MS downloads
-	subsection $MSG_DOWNLOADING_FROM microsoft.com:
+	subsection Downloading from microsoft.com:
 
 	download http://download.microsoft.com/download/d/1/3/d13cd456-f0cf-4fb2-a17f-20afc79f8a51/DCOM98.EXE
 	download http://activex.microsoft.com/controls/vc/mfc42.cab
@@ -124,21 +119,21 @@ ok
 # Someone needs to to something before we continue???
 pre_install
 
-# IE6 Installation module #####################################################
+### IE6 Installation module ###
 
 # IE6 Installation Process
 if [ "$INSTALLIE6" = "1" ]; then
-	section $MSG_INSTALLING IE 6
+	section Installing IE 6
 else
-	section $MSG_INSTALLING IE
+	section Installing IE
 fi
 
-subsection $MSG_INITIALIZING
+subsection Initializing
 	clean_tmp
 	set_wine_prefix "$BASEDIR/ie6/"
 	rm -rf "$BASEDIR/ie6"
 
-subsection $MSG_CREATING_PREFIX
+subsection Creating Wine Prefix
 	create_wine_prefix
 
 	# Discover Wine folders
@@ -164,7 +159,7 @@ subsection $MSG_CREATING_PREFIX
 		ln -s "$SYSTEM32" "system"
 	fi
 
-subsection $MSG_EXTRACTING_CABS
+subsection Extracting CAB files
 	clean_tmp
 	cd "$BASEDIR/tmp"
 	extractCABs "$DOWNLOADDIR/ie6/$IE6_LOCALE"/{ADVAUTH,CRLUPD,HHUPD,IEDOM,IE_EXTRA,IE_S*,SETUPW95,VGX}.CAB
@@ -172,7 +167,7 @@ subsection $MSG_EXTRACTING_CABS
 	extractCABs ie_1.cab
 	rm -f *cab regsvr32.exe setup*
 
-subsection $MSG_INSTALLING IE 6
+subsection Installing IE 6
 	mv cscript.exe "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$COMMAND/"
 	mv wscript.exe "$BASEDIR/ie6/$DRIVEC/$WINDOWS/"
 	
@@ -185,7 +180,7 @@ subsection $MSG_INSTALLING IE 6
 	mv -f * "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/"
 	clean_tmp
 
-subsection $MSG_INSTALLING DCOM98
+subsection Installing DCOM98
 	extractCABs -d "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/" "$DOWNLOADDIR/DCOM98.EXE"
 	mv "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/rpcltscm.dll" "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/rpcltspx.dll"
 	mv "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/dcom98.inf" "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/"
@@ -209,7 +204,7 @@ subsection $MSG_INSTALLING DCOM98
 # 			register_dll "C:\\Windows\\System\\$dll"
 # 		done
 
-subsection $MSG_INSTALLING_FONTS
+subsection Installing TTF Fonts
 	clean_tmp
 	cd "$BASEDIR/tmp"
 	extractCABs -F "*TTF" "$DOWNLOADDIR/ie6/$IE6_LOCALE/"/FONT*CAB
@@ -227,7 +222,7 @@ subsection Installing Core Fonts
 	mv *ttf "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$FONTS/"
 }
 
-subsection $MSG_INSTALLING ActiveX MFC42
+subsection Installing ActiveX MFC42
 	extractCABs "$DOWNLOADDIR/mfc42.cab"
 	extractCABs mfc42.exe
 	mv *.inf "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/"
@@ -236,114 +231,114 @@ subsection $MSG_INSTALLING ActiveX MFC42
 	register_dll "C:\\Windows\\System\\mfc42.dll"
 	clean_tmp
 
-subsection $MSG_INSTALLING RICHED20
+subsection Installing RICHED20
 	extractCABs -F ver1200.exe "$DOWNLOADDIR/249973USA8.exe"
 	extractCABs "$BASEDIR/tmp/ver1200.exe"
 	mv riched20.120 "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/riched20.dll"
 	mv riched32.dll usp10.dll "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/"
 	clean_tmp
 
-subsection $MSG_INSTALLING_REGISTRY
-	add_registry "$IES4LINUX"/winereg/ie6.reg
+subsection Installing registry
+	add_registry "$SCRIPTDIR"/winereg/ie6.reg
 	install_home_page ie6
 
-subsection $MSG_FINALIZING
+subsection Finalizing
 	reboot_wine
 	[ "$INSTALLIE6" = "1" ] &&  createShortcuts ie6 6.0
 	chmod -R u+rwx "$BASEDIR/ie6"
 
 ok
 
-# Flash Installation module ###################################################
+### Flash Installation module ###
 
 [ "$INSTALLFLASH" = "1" ] && {
-	section $MSG_INSTALLING_FLASH
+	section Installing Flash Player 9
 		clean_tmp
 		cd "$BASEDIR/tmp/"
 
-	subsection $MSG_EXTRACTING_FILES
+	subsection Extracting files
 		extractCABs "$DOWNLOADDIR/swflash.cab"
 		FLASHOCX=$(echo $BASEDIR/tmp/*.ocx | sed -e "s/.*\///")
 	
-	subsection $MSG_INSTALLING_FLASH_ON ie6
+	subsection Installing Flash on ie6
 		cp swflash.inf "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/"
 		run_inf_file ./swflash.inf
 		register_dll "C:\\Windows\\System\\Macromed\\Flash\\$FLASHOCX"
 		
-	subsection $MSG_FINALIZING
+	subsection Finalizing
 		reboot_wine
 		
 	ok
 }
 
-# IE5.5 Installation module ###################################################
+### IE5.5 Installation module ###
 
 [ "$INSTALLIE55"   = "1" ] &&  {
-	section $MSG_INSTALLING IE 5.5
+	section Installing IE 5.5
 		kill_wineserver
 		set_wine_prefix "$BASEDIR/ie55/"
 		clean_tmp
 
-	subsection $MSG_COPYING_IE6
+	subsection Copying IE6 installation
 		rm -rf "$BASEDIR/ie55"
 		cp -PR "$BASEDIR"/ie6 "$BASEDIR"/ie55
 		DIR="$BASEDIR/ie55/$DRIVEC/$WINDOWS/$SYSTEM"
 		rm "$DIR"/{browseui,dispex,dxtmsft,dxtrans,inetcpl,inetcplc,jscript,mshtml,mshtmled,mshtmler,shdocvw,urlmon}.*
 	
-	subsection $MSG_EXTRACTING_FILES
+	subsection Extracting files
 		cd "$BASEDIR/tmp/"
 		unzip -Lqq "$DOWNLOADDIR"/ie55sp2_9x.zip
 		mv ie55sp2_9x/*{dll,tlb,cpl} "$BASEDIR/ie55/$DRIVEC/$WINDOWS/$SYSTEM/"
 		mv ie55sp2_9x/iexplore.exe "$BASEDIR/ie55/$DRIVEC/Program Files/Internet Explorer/iexplore.exe"
 	
-	subsection $MSG_INSTALLING_REGISTRY
-		add_registry "$IES4LINUX"/winereg/ie55.reg
+	subsection Installing registry
+		add_registry "$SCRIPTDIR"/winereg/ie55.reg
 		install_home_page ie55
 
-	subsection $MSG_FINALIZING
+	subsection Finalizing
 		createShortcuts ie55 5.5
 		chmod -R u+rwx "$BASEDIR/ie55"
 	
 	ok
 }
 
-# IE5.0 Installation module ###################################################
+### IE5.0 Installation module ###
 
 [ "$INSTALLIE5"   = "1" ] &&  {
-	section $MSG_INSTALLING IE 5.0
+	section Installing IE 5.0
 		kill_wineserver
 		set_wine_prefix "$BASEDIR/ie5/"
 		clean_tmp
 
-	subsection $MSG_COPYING_IE6
+	subsection Copying IE6 installation
 		rm -rf "$BASEDIR/ie5"
 		cp -PR "$BASEDIR"/ie6 "$BASEDIR"/ie5
 		DIR="$BASEDIR/ie5/$DRIVEC/$WINDOWS/$SYSTEM"
 		rm "$DIR"/{browseui,dispex,dxtmsft,dxtrans,inetcpl,inetcplc,jscript,mshtml,mshtmled,mshtmler,shdocvw,urlmon}.*
 	
-	subsection $MSG_EXTRACTING_FILES
+	subsection Extracting files
 		cd "$BASEDIR/tmp/"
 		unzip -Lqq "$DOWNLOADDIR/ie501sp2_9x.zip"
 		mv ie501sp2_9x/*{dll,tlb,cpl} "$BASEDIR/ie5/$DRIVEC/$WINDOWS/$SYSTEM/"
 		mv ie501sp2_9x/iexplore.exe "$BASEDIR/ie5/$DRIVEC/Program Files/Internet Explorer/iexplore.exe"
 	
-	subsection $MSG_INSTALLING_REGISTRY
-		add_registry "$IES4LINUX"/winereg/ie5.reg
+	subsection Installing registry
+		add_registry "$SCRIPTDIR"/winereg/ie5.reg
 		install_home_page ie5
 	
-	subsection $MSG_FINALIZING
+	subsection Finalizing
 		createShortcuts ie5 5.0
 		chmod -R u+rwx "$BASEDIR/ie5"
 
 	ok
 }
 
-# IE7.0 Installation module ###################################################
+### IE7.0 Installation module ###
 
 # ATTENTION: IES4LINUX IE7 SUPPORT IS PRE-PRE-ALPHA!
 # USE ONLY TO HELP ME TESTING THIS FEATURE
 [ "$INSTALLIE7"   = "1" ] &&  {
-	section "$MSG_INSTALLING IE 7 (beta)"
+	section "Installing IE 7 (beta)"
 		kill_wineserver
 		set_wine_prefix "$BASEDIR/ie7/"
 		clean_tmp
@@ -355,11 +350,11 @@ ok
 			echo "  HACK: Proceeding with the installation"
 		fi
 
-	subsection $MSG_COPYING_IE6
+	subsection Copying IE6 installation
 		rm -rf "$BASEDIR/ie7"
 		cp -PR "$BASEDIR"/ie6 "$BASEDIR"/ie7
 	
-	subsection $MSG_EXTRACTING_FILES
+	subsection Extracting files
 		cd "$BASEDIR/tmp/"
 
 # 		this is to msvcrt
@@ -399,11 +394,11 @@ ok
 		register_dll "C:\\Windows\\System\\normaliz.dll"
 		register_dll "C:\\Windows\\System\\idndl.dll"
 
-	subsection $MSG_INSTALLING_REGISTRY
-		add_registry "$IES4LINUX"/winereg/ie7.reg
+	subsection Installing registry
+		add_registry "$SCRIPTDIR"/winereg/ie7.reg
 		install_home_page ie7
 	
-	subsection $MSG_FINALIZING
+	subsection Finalizing
 		reboot_wine
 		touch "$BASEDIR/ie7/.firstrun"
 		createShortcuts ie7 7.0
@@ -415,85 +410,85 @@ ok
 # Easter eggs module ##########################################################
 
 [ "$INSTALLIE1"   = "1" ] &&  {
-	section $MSG_INSTALLING IE 1.0
+	section Installing IE 1.0
 		kill_wineserver
 		rm -rf "$BASEDIR/ie1"
 		mkdir -p "$BASEDIR/ie1/$DRIVEC/Program Files/Internet Explorer/History"
 		mkdir -p "$BASEDIR/ie1/$DRIVEC/Program Files/Internet Explorer/dcache"
 
-	subsection $MSG_CREATING_PREFIX
+	subsection Creating Wine Prefix
 		set_wine_prefix "$BASEDIR/ie1/"
 		wineprefixcreate &> /dev/null
 		clean_tmp
 
-	subsection $MSG_EXTRACTING_CABS
+	subsection Extracting CAB files
 		cd "$BASEDIR/tmp"
 		extractCABs "$DOWNLOADDIR"/Msie10.exe
 		extractCABs iexplore.cab -d "$BASEDIR/ie1/$DRIVEC/Program Files/Internet Explorer/"
 		
-	subsection $MSG_INSTALLING_REGISTRY
-		add_registry "$IES4LINUX"/winereg/.ie1.reg
+	subsection Installing registry
+		add_registry "$SCRIPTDIR"/winereg/.ie1.reg
 		install_home_page ie1
 		
-	subsection $MSG_FINALIZING
+	subsection Finalizing
 		createShortcuts ie1 1.0
 		chmod -R u+rwx "$BASEDIR/ie1"
 	
 	ok
 }
 [ "$INSTALLIE15"   = "1" ] &&  {
-	section $MSG_INSTALLING IE 1.5
+	section Installing IE 1.5
 		kill_wineserver
 		rm -rf "$BASEDIR/ie15"
 		mkdir -p "$BASEDIR/ie15/$DRIVEC/Program Files/Internet Explorer/History"
 
-	subsection $MSG_CREATING_PREFIX
+	subsection Creating Wine Prefix
 		set_wine_prefix "$BASEDIR/ie15/"
 		create_wine_prefix
 		clean_tmp
 
-	subsection $MSG_EXTRACTING_CABS
+	subsection Extracting CAB files
 		cd "$BASEDIR/tmp"
 		extractCABs "$DOWNLOADDIR"/IE15I386.EXE -d "$BASEDIR/ie15/$DRIVEC/Program Files/Internet Explorer/"
 		
-	subsection $MSG_INSTALLING_REGISTRY
-		add_registry "$IES4LINUX"/winereg/.ie1.reg
+	subsection Installing registry
+		add_registry "$SCRIPTDIR"/winereg/.ie1.reg
 		install_home_page ie15
 		
-	subsection $MSG_FINALIZING
+	subsection Finalizing
 		createShortcuts ie15 1.5
 		chmod -R u+rwx "$BASEDIR/ie15"
 	
 	ok
 }
 [ "$INSTALLIE2"   = "1" ] &&  {
-	section $MSG_INSTALLING IE 2.0
+	section Installing IE 2.0
 		kill_wineserver
 		rm -rf "$BASEDIR/ie2"
 		mkdir -p "$BASEDIR/ie2/$DRIVEC/Program Files/Internet Explorer/History"
 
-	subsection $MSG_CREATING_PREFIX
+	subsection Creating Wine Prefix
 		set_wine_prefix "$BASEDIR/ie2/"
 		create_wine_prefix
 		clean_tmp
 
-	subsection $MSG_EXTRACTING_CABS
+	subsection Extracting CAB files
 		cd "$BASEDIR/tmp"
 		extractCABs "$DOWNLOADDIR"/msie20.exe
 		extractCABs iexplore.cab -d "$BASEDIR/ie2/$DRIVEC/Program Files/Internet Explorer/"
 		
-	subsection $MSG_INSTALLING_REGISTRY
-		add_registry "$IES4LINUX"/winereg/.ie1.reg
+	subsection Installing registry
+		add_registry "$SCRIPTDIR"/winereg/.ie1.reg
 		install_home_page ie2
 		
-	subsection $MSG_FINALIZING
+	subsection 
 		createShortcuts ie2 2.0
 		chmod -R u+rwx "$BASEDIR/ie2"
 	
 	ok
 }
 
-# After Installation module ###################################################
+### After Installation module ###
 
 # Remove IE6 if user do not want it
 if [ "$INSTALLIE6" = "0" ]; then
@@ -502,14 +497,14 @@ fi
 
 # Post install
 kill_wineserver
-cd "$IES4LINUX" && rm -rf "$BASEDIR/tmp"
+cd "$SCRIPTDIR" && rm -rf "$BASEDIR/tmp"
 post_install
 
 section "$(I) installations finished!"
 
 # Show user how to run her IEs
 echo
-section $MSG_RUN_IES
+section "To run your IEs, type:"
 [ "$INSTALLIE6"  = "1" ] && run_ie 6
 [ "$INSTALLIE55" = "1" ] && run_ie 55
 [ "$INSTALLIE5"  = "1" ] && run_ie 5

@@ -1,0 +1,5 @@
+#!/bin/bash
+# Check if this is Linux
+
+test $(uname) = "Linux"
+exit $?

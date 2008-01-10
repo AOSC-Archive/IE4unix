@@ -1,39 +1,40 @@
 #!/usr/bin/env bash
 #
-# IEs 4 Linux
+# IEs 4 Linux/Mac
 # Developed by: Sergio Luis Lopes Junior <slopes at gmail dot com>
-# Project site: http://tatanka.com.br/ies4linux
+# Projects sites: 
+#	http://tatanka.com.br/ies4linux
+#	http://tatanka.com.br/ies4mac
 #
 # Released under the GNU GPL. See LICENSE for more information
 
-# Discover ies4linux installation folder
-IES4LINUX=`dirname "$0"`
-cd "$IES4LINUX"
-export IES4LINUX=`pwd`
+# Discover the script installation folder
+SCRIPTDIR=`dirname "$0"`
+cd "$SCRIPTDIR"
+export SCRIPTDIR=`pwd`
 
 # Where are we running?
-export LINUX=0
-export DARWIN=0
-if [ $(uname) = "Darwin" ]; then
-	export DARWIN=1
-elif [ $(uname) = "Linux" ]; then
-	export LINUX=1
-fi
+for p in "$SCRIPTDIR"/platforms/*; do
+	if "$p"/identify-platform; then
+		export PLATFORMDIR="$p"
+	fi
+done
+[ "$PLATFORMDIR" = "" ] && echo Not a valid platform && exit 1
 
-# Import functions
-. "$IES4LINUX"/lib/functions.sh
+# Import functions ($1 filename)
+function load_function_file {
+	# Export all functions so subshells can access them
+	. "$1"
+	for fn in $(grep "^function" "$1" | sed -e 's/function[[:space:]]*//g;s/{//g'); do
+		export -f $fn
+	done
+}
 
-# If it's darwin, overwrite some functions
-if [ "$DARWIN" = "1" ]; then
-	. "$IES4LINUX"/mac/functions-overwrite.sh
-fi
-
-# Initialize Debug module
-[ "$DEBUG" != true ] && DEBUG=false
-debug Debug on
-
-# Initialize tmp dir
-mkdir -p "$HOME/.ies4linux/tmp" || error Needs ~/.ies4linux/tmp for temporary files
+# Load all needed functions
+for f in "$SCRIPTDIR"/lib/functions/*.sh; do
+	load_function_file "$f"
+done
+load_function_file "$PLATFORMDIR"/functions.sh
 
 # Init variables
 export INSTALLIE7=0
@@ -60,67 +61,27 @@ export IE6_LOCALES="AR CN CS DA DE EL EN-US ES FI FR HE HU IT JA KO NL NO PL PT 
 
 export NOCOLOR=0
 
-# Default locale
-export GUESSED_IE6_LOCALE=EN-US
-export MESSAGE_FILE=enUS
-
 # Someone can override some variables
 init_variables
 
-# Determine locale and languages
-# We have two methods: $LANG and $(locale)
-{
-	# Loads default language
-	debug Loading lang/enUS.sh
-	eval $(load_variables_file "$IES4LINUX/lang/$MESSAGE_FILE.sh")
+# Initialize tmp dir
+mkdir -p "$TMPDIR" || error Needs $TMPDIR for temporary files
 
-	# Look for user locale
-	if [ ${#LANG} -ge 4 ]; then
-		debug "Using LANG to determine locale - $LANG"
-		SYSLANG=$(echo ${LANG:0:2} | tr A-Z a-z)
-		SYSCOUNTRY=$(echo ${LANG:3:2} | tr A-Z a-z)
-	else
-		$(locale | sed -e 's/^/export /g;s/"//g')
-		debug "Using 'locale' to determine locale - $LC_MESSAGES"
-		SYSLANG=$(echo ${LC_MESSAGES:0:2} | tr A-Z a-z)
-		SYSCOUNTRY=$(echo ${LC_MESSAGES:3:2} | tr A-Z a-z)
-	fi
-	
-	# Search for language configuration
-	langline=$(grep -e "^${SYSLANG}[[:space:]]\+${SYSCOUNTRY}[[:space:]]\+" -e "^${SYSLANG}[[:space:]]\+\.[[:space:]]\+" "$IES4LINUX/lib/messages.txt" | head -n 1)
-
-	if [ "$langline" != "" ]; then
-
-		debug Found language line: $langline
-
-		# Configures language
-		export GUESSED_IE6_LOCALE="$(echo $langline | awk '{print $4}')"
-		export MESSAGE_FILE=$(echo $langline | awk '{print $3}')
-		export MESSAGE_FILE_FULLPATH="$IES4LINUX/lang/$MESSAGE_FILE.sh"
-
-		debug Loading lang/$MESSAGE_FILE.sh
-		load_default_language
-	
-		debug Loading $MESSAGE_FILE with iconv
-		enc=$TRANSLATION_ENCODING
-		eval $(load_variables_file "$MESSAGE_FILE_FULLPATH" | iconv -f $enc 2> /dev/null )
-	fi
-}
-
-# Check dependencies for wine, cabextract, wget, unzip ########################
+# Check dependencies for wine, cabextract, wget, unzip
 find_wine
 find_cabextract
 find_download_program
 find_unzip
 
-[ "$(whoami)" = "root" ] && warning $MSG_WARNING_ROOT
+# TODO add sudo warning too
+[ "$(whoami)" = "root" ] && warning "You are root! This is very discouraged! IE is too insecure for you to give him root access.\nWant a tip from a friend? Run ies4linux as your normal user or, what's better, if you can, create a separate user just to handle your IEs."
 
-# Configure options ###########################################################
+### Configure options ###
 
 # Get command-line options
 while [ $# -gt 0 ]; do
 	case "$1" in
-	--install-ie6 | --install-flash)   shift;;
+	--install-ie6 | --install-flash| --create-desktop-icons)   shift;;
 	--install-ie55)     export INSTALLIE55=1;   shift ;;
 	--install-ie5)      export INSTALLIE5=1;    shift ;;
 	--install-ie2)      export INSTALLIE2=1;    shift ;;
@@ -136,25 +97,19 @@ while [ $# -gt 0 ]; do
 	--no-menu-icon)     export CREATE_MENU_ICON=0;   shift ;;
 	--install-corefonts) export INSTALLCOREFONTS=1; shift ;;
 	
-	--basedir)          export BASEDIR="$2";     shift 2 ;;
-	--bindir)           export BINDIR="$2";      shift 2 ;;
-	--downloaddir)	    export DOWNLOADDIR="$2"; changeddownloaddir=1; shift 2 ;;
+	--base-dir)          export BASEDIR="$2";     shift 2 ;;
+	--bin-dir)           export BINDIR="$2";      shift 2 ;;
+	--download-dir)	    export DOWNLOADDIR="$2"; changeddownloaddir=1; shift 2 ;;
 	--wget-flags)       export WGETFLAGS="$2";   shift 2 ;;
 	
-	--no-gui)           export IES4LINUX_MODE="automatic"; shift ;;
 	--no-color)	    export NOCOLOR=1;        shift 1 ;;
-	--gui)              export PREFERRED_GUI=$2; shift 2 ;;
-	--no-localization)
-		eval $(load_variables_file "$IES4LINUX/lang/enUS.sh")
-		shift
-		;;
-	
 	--uninstall)
 		uninstall
 		exit 0
 		;;
 	--locale)
-		export CHOOSED_IE6_LOCALE=$(echo "$2" | tr a-z A-Z)
+		export IE6_LOCALE=$(echo "$2" | tr a-z A-Z)
+		echo " $IE6_LOCALES " | grep " $IE6_LOCALE " &> /dev/null || error Invalid locale! Please run IEs4Linux again and choose a valid one.
 		shift 2
 		;;
 	--list-locales)
@@ -191,22 +146,18 @@ if [ "$changeddownloaddir" != "1" ]; then
 	DOWNLOADDIR="$BASEDIR/$DOWNLOADDIR_SUFFIX"
 fi
 
-# Determine IE6 locale
-if [ "$CHOOSED_IE6_LOCALE" != "" ]; then
-	if ! echo " $IE6_LOCALES " | grep " $CHOOSED_IE6_LOCALE " &> /dev/null; then
-		error $MSG_ERROR_INVALIDLOCALE
-	fi
-	IE6_LOCALE=$CHOOSED_IE6_LOCALE
-else
-	IE6_LOCALE=$GUESSED_IE6_LOCALE
+# See if user chose at least one IE
+if [ "$((INSTALLIE6+INSTALLIE55+INSTALLIE5+INSTALLIE7+INSTALLIE1+INSTALLIE2+INSTALLIE15))" = "0" ]; then
+	error Please choose at least one IE version to install
 fi
 
-# Run installer #
-bash "$IES4LINUX"/lib/install.sh
+### Run installer ###
+bash "$SCRIPTDIR"/lib/install.sh
 
 # Remove temp dir
-cd "$IES4LINUX" && rm -rf "$HOME/.ies4linux/tmp"
+rm -rf "$TMPDIR"
 
 # Remove ~/.ies4linux if its empty now
+# TODO check this
 rmdir "$HOME/.ies4linux" &> /dev/null
 
