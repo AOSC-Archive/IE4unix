@@ -115,7 +115,7 @@ function create_app_bundle {
 
     kill_wineserver
     
-    local appfolder="$HOME/Desktop/Internet Explorer $2.app/"
+    local appfolder="/tmp/Internet Explorer $2.app/"
 	
     rm -rf "$appfolder" > /dev/null
     mkdir -p "$appfolder"
@@ -135,4 +135,6 @@ function create_app_bundle {
 #    }
 
 	get_start_page $1 firstrun
+	rm -rf "$HOME/Desktop/Internet Explorer $2.app/"
+	mv "/tmp/Internet Explorer $2.app/" "$HOME/Desktop/Internet Explorer $2.app/"
 }
