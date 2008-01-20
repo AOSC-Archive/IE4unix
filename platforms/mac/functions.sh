@@ -42,60 +42,20 @@ function pre_install {
 # $1 ie version
 # $2 (optional) firstrun
 function get_start_page {
-	local url="http://www.tatanka.com.br/ies4mac/startpage?lang=$TRANSLATION_LOCALE&ieversion=$1"
+	local url="http://www.tatanka.com.br/ies4linux/startpage?lang=$TRANSLATION_LOCALE&ieversion=$1"
 	if [ "$2" = "firstrun" ]; then
 		url="$url&firstrun=true"
 	fi
 	export START_PAGE="$url"
 }
 
-# Create all shortcuts: .ies4linux/bin/$1, bin/$1 and Desktop icon
-# $1 excutable name
-# $2 IE version
-function createShortcuts {
-	# On Mac, do not use BINDIR (yet)
-
-	touch "$BASEDIR/$1/.firstrun"
-	rm -f "$BASEDIR/bin/$1"
-	get_start_page $1 firstrun
-	mkdir -p "$BASEDIR/bin"
-
-        cat << END > "$BASEDIR/bin/$1"
-#!/usr/bin/env bash
-# IEs 4 Mac script to run $1 - http://tatanka.com.br/ies4mac
-
-debugPipe() {
-	while read line; do [ "\$DEBUG" = "true" ] && echo \$line; done
-}
-
-cd
-export PATH="$PATH"
-export WINEPREFIX="$BASEDIR/$1"
-
-# TODO do we need that?
-open-x11
-
-if [ -f "$BASEDIR/$1/.firstrun" ]; then
-        rm "$BASEDIR/$1/.firstrun"
-        ( wine "$BASEDIR/$1/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "${START_PAGE}" 2>&1 ) | debugPipe
-else
-        ( wine "$BASEDIR/$1/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "\$@" 2>&1 ) | debugPipe
-fi
-END
-        chmod +x "$BASEDIR/bin/$1"
-	ln -sf "$BASEDIR/bin/$1" "$BINDIR/$1"
-
-	# TODO create .app shortcuts
-}
-
 function post_install {
 	rm -rf "$BASEDIR/cabextract"
 }
 
-
 ### Overwrite some functions
 function find_wine {
-	WINEHOME=$("$PLATFORMDIR"/whereiswine.sh)
+	WINEHOME=$("$PLATFORMDIR"/whereiswine)
 	[ "$WINEHOME" = "" ] && error "$(I) couldn't find wine or darwine"
 	export PATH="$WINEHOME":$PATH
 	export WINEHOME
@@ -114,6 +74,99 @@ function getFileSize {
 # Darwin does not have pidof, so we make a ingenue one
 # $1 program to look for
 function pidof {
-	ps | grep "$1" | head -n 1 | awk '{print $1}'
+	ps x | grep "$1" | head -n 1 | awk '{print $1}'
 }
 
+# Darwin does not have killall9, so we fake one
+# (thanks to Mike Kronenberg)
+function killall9 {
+	if [ $# -eq 0 ]; then
+		echo "Usage: killall9 NAME"
+		exit
+	fi
+
+	PIDSTT=$(eval "ps x | grep $1 | awk '{print \$1}'")
+	for PID in $PIDSTT;
+	do
+		if (ps -p $PID | grep $PID) &>/dev/null; then
+		    if kill -9 $PID; then
+		        echo "Killed $PID"
+		    else
+		        echo "could not kill $PID"
+		    fi
+		fi
+	done
+}
+
+# Create app bundle
+# $1 excutable name (ex. ie6)
+# $2 IE version (ex. 6.0)
+function createShortcuts {
+	# TODO delay until post_install
+	create_app_bundle $1 $2
+}
+
+
+# Create a .app bundle and move that to the Desktop
+# $1 ie7
+# $2 7.0
+function create_app_bundle {
+    kill_wineserver
+    
+    local appfolder="$HOME/Desktop/Internet Explorer $2.app/"
+	
+    rm -rf "$appfolder" > /dev/null
+    mkdir -p "$appfolder"
+    cp -PR "$PLATFORMDIR/base.app/Contents" "$appfolder"
+    mv "$BASEDIR/$1/" "$appfolder/Contents/Resources/dotwine"
+    cp "$PLATFORMDIR/whereiswine" "$appfolder/Contents/Resources/"
+    
+    # TODO review this
+    sed 's/WHICHINTERNETEXPLORER/Internet Explorer '$2'/' "$PLATFORMDIR/base.app/Contents/Info.plist" > "$appfolder/Contents/Info.plist"
+    #sed 's/WHICHINTERNETEXPLORER/'$1'/' "$PLATFORMDIR/base.app/Contents/Resources/start.sh" > "$appfolder/Contents/Resources/start.sh"
+
+# TODO do we need freetype here??
+#   [ "$INSTALLFONTANTIALIASING" = "0" ] && {
+#        sed 's/export LD_LIBRARY_PATH/#export LD_LIBRARY_PATH/' ~/Desktop/Internet\ Explorer\ $2.app/Contents/Resources/start.sh > ~/Desktop/Internet\ Explorer\ $2.app/Contents/Resources/start.sh2
+#        mv -f ~/Desktop/Internet\ Explorer\ $2.app/Contents/Resources/start.sh2 ~/Desktop/Internet\ Explorer\ $2.app/Contents/Resources/start.sh
+#    }
+
+	get_start_page $1 firstrun
+
+	# creates the executable
+    cat << END > "$appfolder/Contents/MacOS/ies4mac-launcher"
+#!/usr/bin/env bash
+# IEs 4 Mac script to run $1 - http://tatanka.com.br/ies4mac
+
+debugPipe() {
+	while read line; do [ "\$DEBUG" = "true" ] && echo \$line; done
+}
+
+# Resolve dirs
+cd "\$(dirname "\$0")"/../Resources
+export WINEPREFIX="\$(pwd)/dotwine"
+
+# Finds wine
+WINEHOME=\$(./whereiswine)
+[ "\$WINEHOME" = "" ] && exit 1
+
+# Prepare X11
+if test \$(echo \$OSTYPE | grep darwin8); then
+    # set Display properties and start X11 on Tiger
+    export DISPLAY=:0.0
+    /usr/bin/open-x11 "\$WINEHOME"/wine
+else
+    # set Display properties for Leopard
+    export DISPLAY="\$(find -f /tmp/launch-* -name :0)"
+fi
+
+# Run IE
+if [ -f "dotwine/.firstrun" ]; then
+        rm "dotwine/.firstrun"
+        ( "\$WINEHOME"/wine "dotwine/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "${START_PAGE}" 2>&1 ) | debugPipe
+else
+        ( "\$WINEHOME"/wine "dotwine/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "\$@" 2>&1 ) | debugPipe
+fi
+END
+        chmod +x "$appfolder/Contents/MacOS/ies4mac-launcher"
+}

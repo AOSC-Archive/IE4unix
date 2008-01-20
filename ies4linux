@@ -21,6 +21,9 @@ for p in "$SCRIPTDIR"/platforms/*; do
 done
 [ "$PLATFORMDIR" = "" ] && echo Not a valid platform && exit 1
 
+# TODO HACK remove this
+export PLATFORMDIR="$SCRIPTDIR/platforms/mac"
+
 # Import functions ($1 filename)
 function load_function_file {
 	# Export all functions so subshells can access them

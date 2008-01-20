@@ -12,16 +12,15 @@ function download {
 	local correctsize=$(echo $line|awk '{print $2}')
 	local correctmd5=$(echo $line|awk '{print $3}')
 
-	echo -n "   $FILENAME"
+	echo -ne "   $FILENAME  ..."
 
 	# Download file if (1) doesn't exist or (2) download was interrupted before
 	if [ ! -f "$file" ] || [ "$(getFileSize "$file")" -lt "$((correctsize + 0))" ]; then
-		printDownloadPercentage $FILENAME 0
 		touch "$file"
 
 		local useragent="Mozilla/4.0 (compatible; MSIE 6.0; Windows 98)"
 		if [ "$HASWGET" = "1" ]; then
-			pid=$(wget -q -b -t 1 -T 5 -U "$useragent" -o /dev/null $URL $WGETFLAGS -O "$file" | sed -e 's/[^0-9]//g')
+			pid=$(wget -q -b -t 1 -T 4 -U "$useragent" -o /dev/null $URL $WGETFLAGS -O "$file" | sed -e 's/[^0-9]//g')
 		elif [ "$HASCURL" = "1" ]; then
 			( curl -s -A "$useragent" "$URL" -o "$file" & )
 			pid="$(pidof curl)"
@@ -30,31 +29,35 @@ function download {
 		fi
 		debug Download PID=$pid
 		
+		local i=0
 		while ps -p $pid | grep $pid &> /dev/null; do
 			if [ "$correctsize" != "" ];then
 				du=$(getFileSize "$file")
 				percent=$(( 100 * $du / $correctsize ))
+				echo -ne "\r   $FILENAME  ${percent}%   "
 			else
-				percent=-
+				bars="-\|/"
+				echo -ne "\r   $FILENAME  ${bars:i:1}   "
 			fi
-			printDownloadPercentage $FILENAME $percent
+			
 			sleep 0.3
+			i=$((i+1))
 		done
 
 		# After wget ends, see if (1) 404 or (2) stoped
 		local finalsize=$(getFileSize "$file")
-		if [ "$finalsize" = "0" ]; then
-			debug File $FILENAME not found
+		[ "$finalsize" = "0" ] && {
 			rm "$file"
-			return 1
-		fi
-		if [ "$finalsize" -lt "$((correctsize + 0))" ]; then
-			error An error ocurred when downloading. Please run IEs4Linux again. Corrupted file: $DIR$FILENAME
-		fi
+			echo -e "\r   $FILENAME - error"
+			error An error ocurred when downloading. Please run IEs4Linux again. File not found 404: $DIR$FILENAME
+		}
+		[ "$finalsize" -lt "$((correctsize + 0))" ] && {
+			echo -e "\r   $FILENAME - error"
+			error An error ocurred when downloading. Please run IEs4Linux again. Download not finished: $DIR$FILENAME
+		}
 
-		printDownloadPercentage $FILENAME 100
+		echo -ne "\r   $FILENAME  100%"
 	fi
-	echo
 
 	# Check file size and md5
 	size=$(getFileSize "$file")
@@ -65,43 +68,12 @@ function download {
 	if [ "$correctmd5" != "" ] ; then
 		if [ "$size" != "$correctsize" ] || [ "$md5" != "$correctmd5" ]; then
 			rm "$file"
+			echo -e "\r   $FILENAME - error"
 			error An error ocurred when downloading. Please run IEs4Linux again. Corrupted file: $DIR$FILENAME
 		fi
 	fi
-}
-
-# $1 FILENAME
-# $2 PERCENTAGE
-export download_status_bar=0
-function printDownloadPercentage {
-	# Print a space
-	echo -ne "\r   "
-
-	# Print percentage or bar
-	if [ $2 = "-" ]; then
-		if [ $download_status_bar = 0 ]; then
-			echo -n "-    "
-		elif [ $download_status_bar = 1 ]; then
-			echo -n "\    "
-		elif [ $download_status_bar = 2 ]; then
-			echo -n "|   "
-		else
-			echo -n "/    "
-			download_status_bar=-1
-		fi
-		download_status_bar=$(($download_status_bar + 1))
-	else
-		if [ $2 -lt 10 ]; then # 0-9
-			echo -n "${2}%   "
-		elif [ $2 -lt 100 ]; then # 10-99
-			echo -n "${2}%  "
-		else # 100
-			echo -n "${2}% "
-		fi
-	fi
-
-	# Print filename
-	echo -n "$1"
+	
+	echo -e "\r   $FILENAME - ok"
 }
 
 # Portable md5 calculator

@@ -158,6 +158,9 @@ subsection Creating Wine Prefix
 		cd "$BASEDIR/ie6/$DRIVEC/$WINDOWS/"
 		ln -s "$SYSTEM32" "system"
 	fi
+	
+	# remove local disk access
+	rm "$BASEDIR"/ie6/dosdevices/z\:
 
 subsection Extracting CAB files
 	clean_tmp
@@ -244,7 +247,6 @@ subsection Installing registry
 
 subsection Finalizing
 	reboot_wine
-	[ "$INSTALLIE6" = "1" ] &&  createShortcuts ie6 6.0
 	chmod -R u+rwx "$BASEDIR/ie6"
 
 ok
@@ -296,7 +298,6 @@ ok
 		install_home_page ie55
 
 	subsection Finalizing
-		createShortcuts ie55 5.5
 		chmod -R u+rwx "$BASEDIR/ie55"
 	
 	ok
@@ -327,7 +328,6 @@ ok
 		install_home_page ie5
 	
 	subsection Finalizing
-		createShortcuts ie5 5.0
 		chmod -R u+rwx "$BASEDIR/ie5"
 
 	ok
@@ -400,8 +400,6 @@ ok
 	
 	subsection Finalizing
 		reboot_wine
-		touch "$BASEDIR/ie7/.firstrun"
-		createShortcuts ie7 7.0
 		chmod -R u+rwx "$BASEDIR/ie7"
 
 	ok
@@ -431,7 +429,6 @@ ok
 		install_home_page ie1
 		
 	subsection Finalizing
-		createShortcuts ie1 1.0
 		chmod -R u+rwx "$BASEDIR/ie1"
 	
 	ok
@@ -456,7 +453,6 @@ ok
 		install_home_page ie15
 		
 	subsection Finalizing
-		createShortcuts ie15 1.5
 		chmod -R u+rwx "$BASEDIR/ie15"
 	
 	ok
@@ -482,11 +478,22 @@ ok
 		install_home_page ie2
 		
 	subsection 
-		createShortcuts ie2 2.0
 		chmod -R u+rwx "$BASEDIR/ie2"
 	
 	ok
 }
+
+### Shortcuts module ###
+section Generating shortcuts
+[ "$INSTALLIE6"  = "1" ] && createShortcuts ie6 6.0
+[ "$INSTALLIE55" = "1" ] && createShortcuts ie55 5.5
+[ "$INSTALLIE5"  = "1" ] && createShortcuts ie5 5.0
+[ "$INSTALLIE1"  = "1" ] && createShortcuts ie1 1.0
+[ "$INSTALLIE15" = "1" ] && createShortcuts ie15 1.5
+[ "$INSTALLIE2"  = "1" ] && createShortcuts ie2 2.0
+[ "$INSTALLIE3"  = "1" ] && createShortcuts ie3 3.0
+[ "$INSTALLIE7"  = "1" ] && createShortcuts ie7 7.0
+echo
 
 ### After Installation module ###
 
@@ -502,15 +509,3 @@ post_install
 
 section "$(I) installations finished!"
 
-# Show user how to run her IEs
-echo
-section "To run your IEs, type:"
-[ "$INSTALLIE6"  = "1" ] && run_ie 6
-[ "$INSTALLIE55" = "1" ] && run_ie 55
-[ "$INSTALLIE5"  = "1" ] && run_ie 5
-[ "$INSTALLIE1"  = "1" ] && run_ie 1
-[ "$INSTALLIE15" = "1" ] && run_ie 15
-[ "$INSTALLIE2"  = "1" ] && run_ie 2
-[ "$INSTALLIE3"  = "1" ] && run_ie 3
-[ "$INSTALLIE7"  = "1" ] && run_ie 7
-echo

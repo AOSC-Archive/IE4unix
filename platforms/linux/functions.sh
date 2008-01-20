@@ -19,7 +19,19 @@ function pre_install {
 function post_install {
 	# Updates user menu
 	# [ "$CREATE_MENU_ICON" = "1" ] && "$IES4LINUX"/lib/xdg-desktop-menu forceupdate
-	echo a > /dev/null
+
+	# Show user how to run her IEs
+	echo
+	section "To run your IEs, type:"
+	[ "$INSTALLIE6"  = "1" ] && run_ie 6
+	[ "$INSTALLIE55" = "1" ] && run_ie 55
+	[ "$INSTALLIE5"  = "1" ] && run_ie 5
+	[ "$INSTALLIE1"  = "1" ] && run_ie 1
+	[ "$INSTALLIE15" = "1" ] && run_ie 15
+	[ "$INSTALLIE2"  = "1" ] && run_ie 2
+	[ "$INSTALLIE3"  = "1" ] && run_ie 3
+	[ "$INSTALLIE7"  = "1" ] && run_ie 7
+	echo
 }
 
 # $1 ie version
@@ -59,7 +71,7 @@ else
         ( wine "$BASEDIR/$1/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "\$@" 2>&1 ) | debugPipe
 fi
 END
-        chmod +x "$BASEDIR/bin/$1"
+    chmod +x "$BASEDIR/bin/$1"
 	ln -sf "$BASEDIR/bin/$1" "$BINDIR/$1"
 
 	# Create launcher icon
