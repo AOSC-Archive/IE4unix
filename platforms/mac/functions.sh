@@ -111,12 +111,15 @@ function createShortcuts {
 # $1 ie7
 # $2 7.0
 function create_app_bundle {
+	# just copy dotwine, change ie versions and we it's done
+
     kill_wineserver
     
     local appfolder="$HOME/Desktop/Internet Explorer $2.app/"
 	
     rm -rf "$appfolder" > /dev/null
     mkdir -p "$appfolder"
+    
     cp -PR "$PLATFORMDIR/base.app/Contents" "$appfolder"
     mv "$BASEDIR/$1/" "$appfolder/Contents/Resources/dotwine"
     cp "$PLATFORMDIR/whereiswine" "$appfolder/Contents/Resources/"
@@ -132,41 +135,4 @@ function create_app_bundle {
 #    }
 
 	get_start_page $1 firstrun
-
-	# creates the executable
-    cat << END > "$appfolder/Contents/MacOS/ies4mac-launcher"
-#!/usr/bin/env bash
-# IEs 4 Mac script to run $1 - http://tatanka.com.br/ies4mac
-
-debugPipe() {
-	while read line; do [ "\$DEBUG" = "true" ] && echo \$line; done
-}
-
-# Resolve dirs
-cd "\$(dirname "\$0")"/../Resources
-export WINEPREFIX="\$(pwd)/dotwine"
-
-# Finds wine
-WINEHOME=\$(./whereiswine)
-[ "\$WINEHOME" = "" ] && exit 1
-
-# Prepare X11
-if test \$(echo \$OSTYPE | grep darwin8); then
-    # set Display properties and start X11 on Tiger
-    export DISPLAY=:0.0
-    /usr/bin/open-x11 "\$WINEHOME"/wine
-else
-    # set Display properties for Leopard
-    export DISPLAY="\$(find -f /tmp/launch-* -name :0)"
-fi
-
-# Run IE
-if [ -f "dotwine/.firstrun" ]; then
-        rm "dotwine/.firstrun"
-        ( "\$WINEHOME"/wine "dotwine/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "${START_PAGE}" 2>&1 ) | debugPipe
-else
-        ( "\$WINEHOME"/wine "dotwine/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "\$@" 2>&1 ) | debugPipe
-fi
-END
-        chmod +x "$appfolder/Contents/MacOS/ies4mac-launcher"
 }

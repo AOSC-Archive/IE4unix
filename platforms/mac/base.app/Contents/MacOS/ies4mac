@@ -1,0 +1,37 @@
+#!/bin/bash
+# IEs 4 Mac script to run IE - http://tatanka.com.br/ies4mac
+
+debugPipe() {
+	while read line; do [ "\$DEBUG" = "true" ] && echo \$line; done
+}
+
+# PWD = this script location
+# Go to Resources
+cd ../Resources
+
+# Prepare wine
+export WINEPREFIX="$(pwd)/dotwine"
+
+# Finds wine
+export WINEHOME="$(./whereiswine)"
+[ "$WINEHOME" = "" ] && exit 1
+
+# Prepare X11
+if test $(echo $OSTYPE | grep darwin8); then
+    # set Display properties and start X11 on Tiger
+    export DISPLAY=":0.0"
+    /usr/bin/open-x11 "$WINEHOME"/wine
+else
+    # set Display properties for Leopard
+    export DISPLAY="$(find -f /tmp/launch-* -name :0)"
+fi
+
+# Run IE
+if [ -f "dotwine/.firstrun" ]; then
+        rm "dotwine/.firstrun"
+        ( "$WINEHOME"/wine "dotwine/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "${START_PAGE}" 2>&1 ) | debugPipe
+else
+        ( "$WINEHOME"/wine "dotwine/$DRIVEC/Program Files/Internet Explorer/IEXPLORE.EXE" "\$@" 2>&1 ) | debugPipe
+fi
+
+
