@@ -125,7 +125,7 @@ function create_app_bundle {
     cp "$PLATFORMDIR/whereiswine" "$appfolder/Contents/Resources/"
     
     # TODO review this
-    sed 's/WHICHINTERNETEXPLORER/Internet Explorer '$2'/' "$PLATFORMDIR/base.app/Contents/Info.plist" > "$appfolder/Contents/Info.plist"
+    sed 's/BUNDLENAME/Internet Explorer '$2'/;s/IEVER/'$1'/;s/IES4MACVER/2.99.1/' "$PLATFORMDIR/base.app/Contents/Info.plist" > "$appfolder/Contents/Info.plist"
     #sed 's/WHICHINTERNETEXPLORER/'$1'/' "$PLATFORMDIR/base.app/Contents/Resources/start.sh" > "$appfolder/Contents/Resources/start.sh"
 
 # TODO do we need freetype here??

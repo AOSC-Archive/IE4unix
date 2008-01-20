@@ -1,8 +1,9 @@
 #!/bin/bash
 # IEs 4 Mac script to run IE - http://tatanka.com.br/ies4mac
 
-# PWD = this script location
+# $0 = this script location
 # Go to Resources
+cd "$(dirname "$0")"
 cd ../Resources/
 
 # Finds wine

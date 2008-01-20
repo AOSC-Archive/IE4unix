@@ -7,22 +7,22 @@
 	<key>CFBundleExecutable</key>
 	<string>ies4mac</string>
 	<key>CFBundleIconFile</key>
-	<string>ies4mac</string>
+	<string>ies4mac.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>br.com.tatanka.ies4mac</string>
+	<string>br.com.tatanka.ies4mac.IEVER</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>WHICHINTERNETEXPLORER</string>
+	<string>BUNDLENAME</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>3.0.0</string>
-	<key>NSMainNibFile</key>
-	<string>MainMenu</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+	<string>IES4MACVER</string>
+	<key>LSMultipleInstancesProhibited</key>
+	<true/>
+	<key>NSAppleScriptEnabled</key>
+	<false/>
 </dict>
 </plist>
