@@ -159,9 +159,6 @@ subsection Creating Wine Prefix
 		ln -s "$SYSTEM32" "system"
 	fi
 	
-	# remove local disk access
-	rm "$BASEDIR"/ie6/dosdevices/z\:
-
 subsection Extracting CAB files
 	clean_tmp
 	cd "$BASEDIR/tmp"
