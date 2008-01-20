@@ -1,0 +1,4 @@
+CFBundleName = "base";
+CFBundleShortVersionString = "1.0";
+CFBundleGetInfoString = "base version 1.0 Copyright 2008 Sergio Lopes";
+NSHumanReadableCopyright = "Copyright 2008 Sergio Lopes.";
