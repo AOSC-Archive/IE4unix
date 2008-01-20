@@ -1,5 +1,5 @@
 import gtk, pango, sys, os
-gtk.threads_init()
+gtk.gdk.threads_init()
 
 # PyGTK GUI implementation
 class GUI:
@@ -168,7 +168,7 @@ class GUI:
 			line = line[2:]
 		
 		# Safe GTK thread
-		gtk.threads_enter()
+		gtk.gdk.threads_enter()
 		
 		# Delete last line if it is \r
 		if self.remove_next_line and line != '\n':
@@ -181,7 +181,7 @@ class GUI:
 		self.textview.scroll_to_iter(self.textbuffer.get_end_iter(), 0)
 
 		# Safe GTK Thread
-		gtk.threads_leave()
+		gtk.gdk.threads_leave()
 		
 		if line[-1] == '\r': self.remove_next_line = True
 

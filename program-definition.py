@@ -1,7 +1,7 @@
 import sys, os
 from model import installer, executor, process
-from gui import guiwx as gui
-#from gui import guigtk as gui
+#from gui import guiwx as gui
+from gui import guigtk as gui
 
 # Platform detection
 MAC = LINUX = False
@@ -12,11 +12,11 @@ else: LINUX=True
 if LINUX:
 	title = "IEs 4 Linux"
 	subtitle = "Installs MS IE 7, 6, 5.5, 5, 2, 1.5, 1 on Linux"
-	logo = "/home/sergio/workspace/ies4linux/trunk/lib/ies4linux.png"
+	logo = "/home/sergio/workspace/ies4linux/trunk/img/ies4linux.png"
 if MAC:
 	title = "IEs 4 Mac"
 	subtitle = "Installs MS IE 7, 6, 5.5, 5, 2, 1.5, 1 on Mac OS X"
-	logo = "/home/sergio/workspace/ies4linux/trunk/lib/ies4mac.png"
+	logo = "/home/sergio/workspace/ies4linux/trunk/img/ies4mac.png"
 
 userhome = os.getenv("HOME")
 
