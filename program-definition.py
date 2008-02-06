@@ -1,22 +1,24 @@
 import sys, os
 from model import installer, executor, process
-#from gui import guiwx as gui
-from gui import guigtk as gui
+from gui import guiwx as gui
+#from gui import guigtk as gui
 
 # Platform detection
 MAC = LINUX = False
 if sys.platform == 'darwin': MAC = True
 else: LINUX=True
 
+# Hack
+# LINUX=False
+# MAC=True
+
 # Platform dependent configs
 if LINUX:
 	title = "IEs 4 Linux"
-	subtitle = "Installs MS IE 7, 6, 5.5, 5, 2, 1.5, 1 on Linux"
-	logo = "/home/sergio/workspace/ies4linux/trunk/img/ies4linux.png"
+	logo = "linux/logo.png"
 if MAC:
 	title = "IEs 4 Mac"
-	subtitle = "Installs MS IE 7, 6, 5.5, 5, 2, 1.5, 1 on Mac OS X"
-	logo = "/home/sergio/workspace/ies4linux/trunk/img/ies4mac.png"
+	logo = "mac/logo.png"
 
 userhome = os.getenv("HOME")
 
@@ -24,7 +26,6 @@ userhome = os.getenv("HOME")
 def MakeTheGUI():
 	return installer.InstallerDefinition()\
 	.set_title(title)\
-	.set_subtitle(subtitle)\
 	.set_logo(logo)\
 	.tab("Install options")\
 		.group("Install Internet Explorers")\
@@ -40,7 +41,7 @@ def MakeTheGUI():
 			.done()\
 		.done()\
 	.tab("Beta options")\
-		.toptext("These options are still beta.")\
+		.toptext("These options are still beta. Use carefully.")\
 		.group("IE 7 engine")\
 			.checkbox("Install IE7 Engine", "--install-ie7", False)\
 			.done()\
@@ -59,7 +60,7 @@ def MakeTheGUI():
 			.textfield("Wget flags", "-c", "--wget-flags")\
 			.done()\
 		.done()\
-	.tab("Advanced", MAC)\
+	.tab("Advanced Mac", False)\
 		.group("App Bundle")\
 			.checkbox("Create Application Bundle on Desktop", "--create-app", True)\
 			.done()\
@@ -67,8 +68,8 @@ def MakeTheGUI():
 			.textfield("Curl flags", "", "--curl-flags")\
 			.done()\
 		.done()\
-	.button("Install", "img.png", callback_install)\
-	.button("Quit", "img.png", callback_quit)
+	.button("Install", "none.png", callback_install)\
+	.button("Quit", "none.png", callback_quit)
 
 # Callbacks
 def callback_install():

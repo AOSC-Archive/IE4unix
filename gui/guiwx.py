@@ -1,11 +1,7 @@
 import wx
 
-# TODO
-# - executor window
-
-# TODO remove this
-_width = 300
-_height = 380
+_width = 376
+_height = 400
 
 # wxPython GUI implementation
 class GUI:
@@ -20,7 +16,7 @@ class GUI:
 		self.app = wx.App()
 		
 		# Create Window
-		self.window = wx.Frame(None, title=model.title, size=(_width, _height))
+		self.window = wx.Frame(None, title=model.title, size=(_width, _height), style=wx.DEFAULT_FRAME_STYLE & ~ (wx.MINIMIZE_BOX | wx.RESIZE_BOX | wx.MAXIMIZE_BOX |wx.RESIZE_BORDER))
 		window_box = wx.BoxSizer(wx.VERTICAL)
 		self.window.SetSizer(window_box)
 		

@@ -197,7 +197,7 @@ def create_window(title):
 	window.connect("destroy", lambda w: sys.exit(1))
 	window.set_position(gtk.WIN_POS_CENTER)
 	window.set_title(title)
-	window.set_border_width(10)
+	window.set_border_width(0)
 	window.set_resizable(False)
 	mainBox = gtk.VBox()
 	window.add(mainBox)
@@ -209,7 +209,7 @@ def add_logo(window, logoFile):
 	logo = gtk.Image()
 	#logo.set_from_pixbuf(logoImg.scale_simple(100,100,gtk.gdk.INTERP_BILINEAR))
 	logo.set_from_pixbuf(logoImg)
-	logo.set_size_request(100, 100)
+	#logo.set_size_request(100, 100)
 	window.main_vbox.pack_start(logo, False, False, 5)
 
 def create_checkbox(checkbox):
