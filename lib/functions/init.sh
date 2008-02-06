@@ -2,21 +2,21 @@
 
 # Find where wine is
 function find_wine {
-	which wine &> /dev/null || error You need to install wine first
+	[ -f "`which wine`" ] || error You need to install wine first
 	wine --version 2>&1  | grep -q "0.9." || warning Your wine is too old. Please update it.
 }
 
 # check for cabextract
 function find_cabextract {
-	which cabextract &> /dev/null || error You need to install cabextract first
+	[ -f "`which cabextract`" ] || error You need to install cabextract first
 	cabextract --version | grep -q "1."   || error Your cabextract is too old, update it.
 }
 
 # check for wget or curl
 function find_download_program {
-	if which wget &> /dev/null; then
+	if [ -f "`which wget`" ]; then
 		export HASWGET=1
-	elif which curl &> /dev/null; then
+	elif [ -f "`which curl`" ]; then
 		export HASCURL=1
 	else
 		error Please install wget first
@@ -24,7 +24,7 @@ function find_download_program {
 }
 
 function find_unzip {
-	which unzip &> /dev/null || error "$(I) couldn't find unzip"
+	[ -f "`which unzip`" ] || error "$(I) couldn't find unzip"
 }
 
 # Loads any file with environment variables

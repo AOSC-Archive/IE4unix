@@ -79,7 +79,7 @@ function download {
 # Portable md5 calculator
 # $1 file
 function getMD5 {
-	if which md5sum &> /dev/null;then
+	if [ -f "`which md5sum`" ]; then
 		MD5SUM=$(md5sum "$1")
 	else
 		MD5SUM=$(md5 -q "$1")
@@ -97,8 +97,9 @@ function getFileSize {
 		return 0
 	}
 
+	# FreeBSD uses this
 	wc '-c' "$1" &> '/dev/null' && {
-		wc '-c' "$1"
+		wc '-c' "$1" | awk '{print $1}'
 		return 0
 	}
 

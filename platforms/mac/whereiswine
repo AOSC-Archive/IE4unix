@@ -5,7 +5,7 @@
 # License: GPLv2
 
 # is Wine in PATH?
-if test $(which wine); then
+if [ -f "`which wine`" ]; then
 	WINEHOME=$(dirname "$(which wine | head -n 1)")
 
 #is wine in /Applications/Darwine?

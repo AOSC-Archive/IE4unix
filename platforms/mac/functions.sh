@@ -34,7 +34,7 @@ function pre_install {
 			cd "$BASEDIR/cabextract/"
 			unzip -Lqq "$DOWNLOADDIR/cabextract-1.2-macintel.zip"
 			export PATH="$BASEDIR/cabextract/":$PATH
-			which cabextract &> /dev/null || error "Download cabextract didn't work"
+			[ -f "`which cabextract`" ] || error "Download cabextract didn't work"
 		ok
 	fi
 }
@@ -63,7 +63,7 @@ function find_wine {
 }
 
 function find_cabextract {
-	which cabextract &> /dev/null || export DARWIN_DOWNLOAD_CABEXTRACT=1
+	[ -f "`which cabextract`" ] || export DARWIN_DOWNLOAD_CABEXTRACT=1
 }
 
 function getFileSize {

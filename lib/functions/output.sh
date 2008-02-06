@@ -8,7 +8,7 @@ function warning {
 		echo
 		tput sgr0;
 	else
-		echo "!! $*"
+		echo -e "!! $*"
 	fi
 }
 function error {

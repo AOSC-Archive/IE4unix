@@ -177,6 +177,7 @@ subsection Installing IE 6
 	
 	mkdir -p "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/sfp/ie/"
 	mv vgx.cat "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/sfp/ie/"
+	mv *.inf "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/"
 	mv -f * "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/"
 	clean_tmp
 
@@ -185,17 +186,15 @@ subsection Installing DCOM98
 	mv "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/rpcltscm.dll" "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/rpcltspx.dll"
 	mv "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/dcom98.inf" "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/"
 
+# TODO is it really necessary? wine doors do that..
+subsection Processing INF files
+#	cd "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/" 
+#	for i in *.inf; do
+# 		run_inf_file ./$i
+# 	done
+ 	cd "$BASEDIR/tmp"
+ 	
 #	This is very slow and do not add anything useful
-#
-# 	subsection $MSG_PROCESSING_INF
-# 		mv *.inf "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/"
-# 		cd "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/"
-# 
-# 		for i in *.inf; do
-# 			subsubsection $i
-# 			run_inf_file ./$i
-# 		done
-# 		cd "$BASEDIR/tmp"
 #
 # 	subsection $MSG_REGISTERING_DLLS	
 # 		cd "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM"

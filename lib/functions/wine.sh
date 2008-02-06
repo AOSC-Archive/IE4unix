@@ -2,7 +2,7 @@
 
 # Call wineprefixcreate
 function create_wine_prefix {
-	if which wineprefixcreate &> /dev/null; then
+	if [ -f "`which wineprefixcreate`" ]; then
 		( wineprefixcreate 2>&1 ) | debugPipe
 	else
 		error Your wine does not have wineprefixcreate installed. Maybe because it is too old.

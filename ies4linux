@@ -22,7 +22,7 @@ done
 [ "$PLATFORMDIR" = "" ] && echo Not a valid platform && exit 1
 
 # TODO HACK remove this
-export PLATFORMDIR="$SCRIPTDIR/platforms/mac"
+# export PLATFORMDIR="$SCRIPTDIR/platforms/mac"
 
 # Import functions ($1 filename)
 function load_function_file {
@@ -67,18 +67,6 @@ export NOCOLOR=0
 # Someone can override some variables
 init_variables
 
-# Initialize tmp dir
-mkdir -p "$TMPDIR" || error Needs $TMPDIR for temporary files
-
-# Check dependencies for wine, cabextract, wget, unzip
-find_wine
-find_cabextract
-find_download_program
-find_unzip
-
-# TODO add sudo warning too
-[ "$(whoami)" = "root" ] && warning "You are root! This is very discouraged! IE is too insecure for you to give him root access.\nWant a tip from a friend? Run ies4linux as your normal user or, what's better, if you can, create a separate user just to handle your IEs."
-
 ### Configure options ###
 
 # Get command-line options
@@ -106,10 +94,6 @@ while [ $# -gt 0 ]; do
 	--wget-flags)       export WGETFLAGS="$2";   shift 2 ;;
 	
 	--no-color)	    export NOCOLOR=1;        shift 1 ;;
-	--uninstall)
-		uninstall
-		exit 0
-		;;
 	--locale)
 		export IE6_LOCALE=$(echo "$2" | tr a-z A-Z)
 		echo " $IE6_LOCALES " | grep " $IE6_LOCALE " &> /dev/null || error Invalid locale! Please run IEs4Linux again and choose a valid one.
@@ -153,6 +137,19 @@ fi
 if [ "$((INSTALLIE6+INSTALLIE55+INSTALLIE5+INSTALLIE7+INSTALLIE1+INSTALLIE2+INSTALLIE15))" = "0" ]; then
 	error Please choose at least one IE version to install
 fi
+
+# Initialize tmp dir
+mkdir -p "$TMPDIR" || error Needs $TMPDIR for temporary files
+
+# Check dependencies for wine, cabextract, wget, unzip
+find_wine
+find_cabextract
+find_download_program
+find_unzip
+
+# TODO add sudo warning too
+# Check for root
+[ "$(whoami)" = "root" ] && warning "You are root! This is very discouraged! IE is too insecure for you to give him root access.\nWant a tip from a friend? Run ies4linux as your normal user or, what's better, if you can, create a separate user just to handle your IEs."
 
 ### Run installer ###
 bash "$SCRIPTDIR"/lib/install.sh
