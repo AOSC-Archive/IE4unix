@@ -12,7 +12,7 @@ function init_variables {
 	export DARWIN=1
 	export PLATFORM="mac"
 	
-	export BASEDIR="$HOME/Library/Application Support/IEs4Mac/dot-ies4mac"
+	export BASEDIR="$HOME/Library/Application Support/IEs4Mac/"
 	export BINDIR="$HOME/Library/Application Support/IEs4Mac/bin"
 	export DOWNLOADDIR="$HOME/Library/Application Support/IEs4Mac/downloads"
 	export TMPDIR="$HOME/Library/Application Support/IEs4Mac/tmp"
