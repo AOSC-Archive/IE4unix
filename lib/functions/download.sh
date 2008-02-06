@@ -20,7 +20,7 @@ function download {
 
 		local useragent="Mozilla/4.0 (compatible; MSIE 6.0; Windows 98)"
 		if [ "$HASWGET" = "1" ]; then
-			pid=$(wget -q -b -t 1 -T 4 -U "$useragent" -o /dev/null $URL $WGETFLAGS -O "$file" | sed -e 's/[^0-9]//g')
+			pid=$(wget -q -b -t 2 -T 4 -U "$useragent" -o /dev/null $URL $WGETFLAGS -O "$file" | sed -e 's/[^0-9]//g')
 		elif [ "$HASCURL" = "1" ]; then
 			( curl -s -A "$useragent" "$URL" -o "$file" & )
 			pid="$(pidof curl)"
@@ -73,7 +73,7 @@ function download {
 		fi
 	fi
 	
-	echo -e "\r   $FILENAME - ok"
+	echo -e "\r   $FILENAME - ok    "
 }
 
 # Portable md5 calculator

@@ -12,7 +12,7 @@ function extractCABs {
 		num=$((num+1))
 	done
 
-	eval $tmp &> $logfile
+	eval "$tmp" &> "$logfile"
 	if [ $? != 0 ]; then
 		cat "$logfile" && rm "$logfile"
 		error An error occured when trying to cabextract some files.
