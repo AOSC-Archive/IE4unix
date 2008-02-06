@@ -21,9 +21,6 @@ for p in "$SCRIPTDIR"/platforms/*; do
 done
 [ "$PLATFORMDIR" = "" ] && echo Not a valid platform && exit 1
 
-# TODO HACK remove this
-# export PLATFORMDIR="$SCRIPTDIR/platforms/mac"
-
 # Import functions ($1 filename)
 function load_function_file {
 	# Export all functions so subshells can access them
@@ -39,7 +36,7 @@ for f in "$SCRIPTDIR"/lib/functions/*.sh; do
 done
 load_function_file "$PLATFORMDIR"/functions.sh
 
-# Init variables
+### Init variables
 export INSTALLIE7=0
 export INSTALLIE6=1
 export INSTALLIE55=0
@@ -50,19 +47,19 @@ export INSTALLIE1=0
 
 export INSTALLFLASH=1
 export INSTALLCOREFONTS=0
+
+export IE6_LOCALE="EN-US"
+export IE6_LOCALES="AR CN CS DA DE EL EN-US ES FI FR HE HU IT JA KO NL NO PL PT PT-BR RU SV TR TW"
+export NOCOLOR=0
+
+# Default places for most platforms (not for Mac)
 export CREATE_DESKTOP_ICON=1
 export CREATE_MENU_ICON=0
-
 export BASEDIR="$HOME/.ies4linux"
 export BINDIR="$HOME/bin"
 export WGETFLAGS="-c "
 export DOWNLOADDIR_SUFFIX="downloads"
 export DOWNLOADDIR="$BASEDIR/$DOWNLOADDIR_SUFFIX"
-
-export IE6_LOCALE="EN-US"
-export IE6_LOCALES="AR CN CS DA DE EL EN-US ES FI FR HE HU IT JA KO NL NO PL PT PT-BR RU SV TR TW"
-
-export NOCOLOR=0
 
 # Someone can override some variables
 init_variables
@@ -139,6 +136,7 @@ if [ "$((INSTALLIE6+INSTALLIE55+INSTALLIE5+INSTALLIE7+INSTALLIE1+INSTALLIE2+INST
 fi
 
 # Initialize tmp dir
+export TMPDIR="$BASEDIR/tmp/"
 mkdir -p "$TMPDIR" || error Needs $TMPDIR for temporary files
 
 # Check dependencies for wine, cabextract, wget, unzip
@@ -157,7 +155,4 @@ bash "$SCRIPTDIR"/lib/install.sh
 # Remove temp dir
 rm -rf "$TMPDIR"
 
-# Remove ~/.ies4linux if its empty now
-# TODO check this
-rmdir "$HOME/.ies4linux" &> /dev/null
 

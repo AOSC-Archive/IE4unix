@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 #
-# IEs 4 Linux
+# IEs 4 Linux/Mac
 # Developed by: Sergio Luis Lopes Junior <slopes at gmail dot com>
-# Project site: http://tatanka.com.br/ies4linux
+# Project site: 
+#	http://tatanka.com.br/ies4linux
+#	http://tatanka.com.br/ies4mac
+#
 # Released under the GNU GPL. See LICENSE for more information
 #
 # install.sh
@@ -43,13 +46,12 @@ section "$(I) will:"
 	[ "$INSTALLFLASH" = "1" ] && subsection - Install Adobe Flash 9.0
 	[ "$INSTALLCOREFONTS" = "1" ] && subsection - Install MS Core Fonts
 	[ "$CREATE_ICON" = "1"  ] && subsection - Create Desktop icons
-	subsection - Install everything at: $BASEDIR
+	#subsection - Install everything at: $BASEDIR
 	#subsection - $MSG_OPTION_DOWNLOADDIR $DOWNLOADDIR
 ok
 
 # Prepare folders
 mkdir -p "$BINDIR"       || error "$(I) couldn't create folder $BINDIR"
-mkdir -p "$BASEDIR/tmp/" || error "$(I) couldn't create folder $BASEDIR"
 mkdir -p "$DOWNLOADDIR"  || error "$(I) couldn't create folder $DOWNLOADDIR"
 cp "$PLATFORMDIR/logo.png" "$BASEDIR"
 
@@ -80,7 +82,7 @@ section Downloading everything we need
 	# SCR56EN is always downloaded from EN-US
 	download "$URL_IE6_CABS/EN-US/SCR56EN.CAB"
 	
-        [ "$INSTALLIE7" = "1" ] && {
+    [ "$INSTALLIE7" = "1" ] && {
 		download "http://download.microsoft.com/download/3/8/8/38889DC1-848C-4BF2-8335-86C573AD86D9/IE7-WindowsXP-x86-enu.exe"
 		#download "http://download.microsoft.com/download/whistler/Patch/q305601/WXP/EN-US/Q305601_WxP_SP1_x86_ENU.exe"
 	}
@@ -97,17 +99,17 @@ section Downloading everything we need
         [ "$INSTALLIE2"  = "1" ] && downloadEvolt ie/32bit/2.0/msie20.exe
         [ "$INSTALLIE3"  = "1" ] && downloadEvolt ie/32bit/3.02/win95typical/msie302r.exe
 
-        # Flash
-        [ "$INSTALLFLASH" = "1" ] && {
-        	echo
-        	subsection "Downloading from macromedia.com:"
-                download "http://download.macromedia.com/get/shockwave/cabs/flash/swflash.cab" || error Cannot download flash
-        }
+	# Flash
+	[ "$INSTALLFLASH" = "1" ] && {
+		echo
+		subsection "Downloading from macromedia.com:"
+	    download "http://download.macromedia.com/get/shockwave/cabs/flash/swflash.cab" || error Cannot download flash
+	}
 
 	# Core fonts
 	[ "$INSTALLCOREFONTS" = "1" ] && {
-        	echo
-        	subsection "Downloading from sourceforge.net"
+    	echo
+    	subsection "Downloading from sourceforge.net"
 
 		export COREFONTS="andale32.exe arial32.exe arialb32.exe comic32.exe courie32.exe georgi32.exe impact32.exe times32.exe trebuc32.exe verdan32.exe wd97vwr32.exe webdin32.exe"
 		for font in $COREFONTS; do
@@ -116,7 +118,7 @@ section Downloading everything we need
 	}
 ok
 
-# Someone needs to to something before we continue???
+# Some platform needs to to something before we continue???
 pre_install
 
 ### IE6 Installation module ###
@@ -161,7 +163,7 @@ subsection Creating Wine Prefix
 	
 subsection Extracting CAB files
 	clean_tmp
-	cd "$BASEDIR/tmp"
+	cd "$TMPDIR"
 	extractCABs "$DOWNLOADDIR/ie6/$IE6_LOCALE"/{ADVAUTH,CRLUPD,HHUPD,IEDOM,IE_EXTRA,IE_S*,SETUPW95,VGX}.CAB
 	extractCABs "$DOWNLOADDIR/ie6/EN-US/SCR56EN.CAB"
 	extractCABs ie_1.cab
@@ -187,14 +189,14 @@ subsection Installing DCOM98
 	mv "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/dcom98.inf" "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/"
 
 # TODO is it really necessary? wine doors do that..
-subsection Processing INF files
+#subsection Processing INF files
 #	cd "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/" 
 #	for i in *.inf; do
 # 		run_inf_file ./$i
 # 	done
- 	cd "$BASEDIR/tmp"
+# 	cd "$TMPDIR"
  	
-#	This is very slow and do not add anything useful
+# TODO	This is very slow and do not add anything useful
 #
 # 	subsection $MSG_REGISTERING_DLLS	
 # 		cd "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM"
@@ -205,7 +207,7 @@ subsection Processing INF files
 
 subsection Installing TTF Fonts
 	clean_tmp
-	cd "$BASEDIR/tmp"
+	cd "$TMPDIR"
 	extractCABs -F "*TTF" "$DOWNLOADDIR/ie6/$IE6_LOCALE/"/FONT*CAB
 	mv *ttf "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$FONTS/"
 	clean_tmp
@@ -216,7 +218,7 @@ subsection Installing Core Fonts
 		extractCABs -F "*TTF" "$DOWNLOADDIR/$font"
 	done
 	extractCABs -F "*cab" "$DOWNLOADDIR/wd97vwr32.exe"
-	extractCABs -F "*TTF" "$BASEDIR/tmp/viewer1.cab"
+	extractCABs -F "*TTF" "$TMPDIR/viewer1.cab"
 	chmod u+w "tahoma.ttf"
 	mv *ttf "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$FONTS/"
 }
@@ -232,7 +234,7 @@ subsection Installing ActiveX MFC42
 
 subsection Installing RICHED20
 	extractCABs -F ver1200.exe "$DOWNLOADDIR/249973USA8.exe"
-	extractCABs "$BASEDIR/tmp/ver1200.exe"
+	extractCABs "$TMPDIR/ver1200.exe"
 	mv riched20.120 "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/riched20.dll"
 	mv riched32.dll usp10.dll "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$SYSTEM/"
 	clean_tmp
@@ -243,7 +245,8 @@ subsection Installing registry
 
 subsection Finalizing
 	reboot_wine
-	chmod -R u+rwx "$BASEDIR/ie6"
+	chmod -R u+rw "$BASEDIR/ie6"
+    kill_wineserver
 
 ok
 
@@ -252,11 +255,11 @@ ok
 [ "$INSTALLFLASH" = "1" ] && {
 	section Installing Flash Player 9
 		clean_tmp
-		cd "$BASEDIR/tmp/"
+		cd "$TMPDIR"
 
 	subsection Extracting files
 		extractCABs "$DOWNLOADDIR/swflash.cab"
-		FLASHOCX=$(echo $BASEDIR/tmp/*.ocx | sed -e "s/.*\///")
+		FLASHOCX=$(echo "$TMPDIR"/*.ocx | sed -e "s/.*\///")
 	
 	subsection Installing Flash on ie6
 		cp swflash.inf "$BASEDIR/ie6/$DRIVEC/$WINDOWS/$INF/"
@@ -265,6 +268,7 @@ ok
 		
 	subsection Finalizing
 		reboot_wine
+	    kill_wineserver
 		
 	ok
 }
@@ -284,7 +288,7 @@ ok
 		rm "$DIR"/{browseui,dispex,dxtmsft,dxtrans,inetcpl,inetcplc,jscript,mshtml,mshtmled,mshtmler,shdocvw,urlmon}.*
 	
 	subsection Extracting files
-		cd "$BASEDIR/tmp/"
+		cd "$TMPDIR"
 		unzip -Lqq "$DOWNLOADDIR"/ie55sp2_9x.zip
 		mv ie55sp2_9x/*{dll,tlb,cpl} "$BASEDIR/ie55/$DRIVEC/$WINDOWS/$SYSTEM/"
 		mv ie55sp2_9x/iexplore.exe "$BASEDIR/ie55/$DRIVEC/Program Files/Internet Explorer/iexplore.exe"
@@ -294,7 +298,8 @@ ok
 		install_home_page ie55
 
 	subsection Finalizing
-		chmod -R u+rwx "$BASEDIR/ie55"
+		chmod -R u+rw "$BASEDIR/ie55"
+		kill_wineserver
 	
 	ok
 }
@@ -314,7 +319,7 @@ ok
 		rm "$DIR"/{browseui,dispex,dxtmsft,dxtrans,inetcpl,inetcplc,jscript,mshtml,mshtmled,mshtmler,shdocvw,urlmon}.*
 	
 	subsection Extracting files
-		cd "$BASEDIR/tmp/"
+		cd "$TMPDIR"
 		unzip -Lqq "$DOWNLOADDIR/ie501sp2_9x.zip"
 		mv ie501sp2_9x/*{dll,tlb,cpl} "$BASEDIR/ie5/$DRIVEC/$WINDOWS/$SYSTEM/"
 		mv ie501sp2_9x/iexplore.exe "$BASEDIR/ie5/$DRIVEC/Program Files/Internet Explorer/iexplore.exe"
@@ -324,7 +329,8 @@ ok
 		install_home_page ie5
 	
 	subsection Finalizing
-		chmod -R u+rwx "$BASEDIR/ie5"
+		chmod -R u+rw "$BASEDIR/ie5"
+		kill_wineserver
 
 	ok
 }
@@ -351,7 +357,7 @@ ok
 		cp -PR "$BASEDIR"/ie6 "$BASEDIR"/ie7
 	
 	subsection Extracting files
-		cd "$BASEDIR/tmp/"
+		cd "$TMPDIR"
 
 # 		this is to msvcrt
 # 		extractCABs "$DOWNLOADDIR"/Q305601_WxP_SP1_x86_ENU.exe
@@ -396,7 +402,8 @@ ok
 	
 	subsection Finalizing
 		reboot_wine
-		chmod -R u+rwx "$BASEDIR/ie7"
+		chmod -R u+rw "$BASEDIR/ie7"
+		kill_wineserver
 
 	ok
 }
@@ -416,7 +423,7 @@ ok
 		clean_tmp
 
 	subsection Extracting CAB files
-		cd "$BASEDIR/tmp"
+		cd "$TMPDIR"
 		extractCABs "$DOWNLOADDIR"/Msie10.exe
 		extractCABs iexplore.cab -d "$BASEDIR/ie1/$DRIVEC/Program Files/Internet Explorer/"
 		
@@ -441,7 +448,7 @@ ok
 		clean_tmp
 
 	subsection Extracting CAB files
-		cd "$BASEDIR/tmp"
+		cd "$TMPDIR"
 		extractCABs "$DOWNLOADDIR"/IE15I386.EXE -d "$BASEDIR/ie15/$DRIVEC/Program Files/Internet Explorer/"
 		
 	subsection Installing registry
@@ -465,7 +472,7 @@ ok
 		clean_tmp
 
 	subsection Extracting CAB files
-		cd "$BASEDIR/tmp"
+		cd "$TMPDIR"
 		extractCABs "$DOWNLOADDIR"/msie20.exe
 		extractCABs iexplore.cab -d "$BASEDIR/ie2/$DRIVEC/Program Files/Internet Explorer/"
 		
@@ -500,8 +507,6 @@ fi
 
 # Post install
 kill_wineserver
-cd "$SCRIPTDIR" && rm -rf "$BASEDIR/tmp"
 post_install
-
 section "$(I) installations finished!"
 

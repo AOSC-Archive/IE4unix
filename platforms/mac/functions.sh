@@ -3,7 +3,6 @@
 # All functions *should* be declared using 'function' keyword.
 # All global variables used by functions should have function name in their name.
 
-
 function I {
 	debug "Hi, I'm a Mac"
 	echo IEs4Mac
@@ -12,12 +11,15 @@ function I {
 function init_variables {
 	export DARWIN=1
 	export PLATFORM="mac"
-	export TMPDIR="/tmp/ies4linux"
 	
-	export BASEDIR="$HOME/Applications/IEs 4 Mac/.ies4mac"
-	export BINDIR="$HOME/Applications/IEs 4 Mac/"
+	export BASEDIR="$HOME/Library/Application Support/IEs4Mac/dot-ies4mac"
+	export BINDIR="$HOME/Library/Application Support/IEs4Mac/bin"
+	export DOWNLOADDIR="$HOME/Library/Application Support/IEs4Mac/downloads"
+	export TMPDIR="$HOME/Library/Application Support/IEs4Mac/tmp"
+	
 	export IES4LINUX_MODE="automatic"
 	export DARWIN_DOWNLOAD_CABEXTRACT=0
+	export CREATE_DESKTOP_ICON=0
 }
 
 function pre_install {
@@ -55,7 +57,7 @@ function post_install {
 
 ### Overwrite some functions
 function find_wine {
-	WINEHOME=$("$PLATFORMDIR"/whereiswine)
+	WINEHOME="$("$PLATFORMDIR"/whereiswine)"
 	[ "$WINEHOME" = "" ] && error "$(I) couldn't find wine or darwine"
 	export PATH="$WINEHOME":$PATH
 	export WINEHOME
@@ -101,21 +103,8 @@ function killall9 {
 # Create app bundle
 # $1 excutable name (ex. ie6)
 # $2 IE version (ex. 6.0)
-function createShortcuts {
-	# TODO delay until post_install
-	create_app_bundle $1 $2
-}
-
-
-# Create a .app bundle and move that to the Desktop
-# $1 ie7
-# $2 7.0
-function create_app_bundle {
-	# just copy dotwine, change ie versions and we it's done
-
-    kill_wineserver
-    
-    local appfolder="/tmp/Internet Explorer $2.app/"
+function createShortcuts {    
+    local appfolder="$TMPDIR/ies4mac-bundles/Internet Explorer $2.app/"
 	
     rm -rf "$appfolder" > /dev/null
     mkdir -p "$appfolder"
@@ -136,5 +125,6 @@ function create_app_bundle {
 
 	get_start_page $1 firstrun
 	rm -rf "$HOME/Desktop/Internet Explorer $2.app/"
-	mv "/tmp/Internet Explorer $2.app/" "$HOME/Desktop/Internet Explorer $2.app/"
+	mv "$appfolder" "$HOME/Desktop/Internet Explorer $2.app/"
 }
+

@@ -9,7 +9,6 @@ function I {
 function init_variables {
 	export LINUX=1
 	export PLATFORM="linux"
-	export TMPDIR="$HOME/.ies4linux/tmp/"
 }
 
 function pre_install {
