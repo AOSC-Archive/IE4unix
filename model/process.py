@@ -36,5 +36,8 @@ class ProcessThread:
 
 	def kill(self):
 		self.stopthread.set()
-		os.kill(self.pid, 9)
+		try:
+			os.kill(self.pid, 9)
+		except OSError:
+			return
 

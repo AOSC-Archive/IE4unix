@@ -87,7 +87,7 @@ def MakeTheExecutor(program):
 			.title("Installing IEs")\
 			.logo(program.logo)\
 			.button("Cancel", "none.png", callback_cancel)\
-			.set_initial_command("/home/sergio/workspace/ies4linux/trunk/ies4linux", ["--no-color"])\
+			.set_initial_command("~/workspace/ies4linux/ies4linux/trunk/ies4linux", ["--no-color"])\
 			.set_program(program)
 	
 # Callbacks

@@ -89,7 +89,8 @@ class GUI:
 			# Add comboboxes
 			for combo in group.comboboxes:
 				l = wx.StaticText(panel, -1, combo.label)
-				c = wx.ComboBox(panel, -1, value=combo.selected, choices=combo.options, style=wx.CB_READONLY)
+				c = wx.ComboBox(panel, -1, choices=combo.options, style=wx.CB_READONLY)
+				c.SetValue(combo.selected) 
 			
 				cbox = wx.BoxSizer(wx.HORIZONTAL)
 				vbox.Add(cbox)
@@ -138,7 +139,7 @@ class GUI:
 
 	def quit(self):
 		#TODO this
-		print 'TODO wx quit'
+		return
 		
 	## EXECUTOR
 	def doExecutor(self, e):
@@ -159,7 +160,7 @@ class GUI:
 		self.last_line_position = -1
 
 		# Add console
-		self.console = wx.TextCtrl(self.window, -1, size=(self.window.GetSize()[0] -4, 100) , style=wx.TE_MULTILINE|wx.TE_READONLY| wx.HSCROLL |wx.TE_PROCESS_ENTER | wx.TE_RICH2)
+		self.console = wx.TextCtrl(self.window, -1, size=(self.window.GetSize()[0] -4, 100) , style=wx.TE_MULTILINE|wx.TE_READONLY| wx.HSCROLL | wx.TE_RICH2)
 		window_box.Add(self.console, 12, wx.CENTER, border=5)
 
 		#Add buttons
@@ -183,7 +184,8 @@ class GUI:
 	def wx_write_command_line(self, line):
 		# Finished installation, change button
 		if line == "END":
-			self.buttons[0].SetString("Close")
+			# TODO how do we change button text?
+			#self.buttons[0].SetString("Close")
 			return
 		# Delete last line if it is \r
 		if self.remove_next_line and line != '\n':
