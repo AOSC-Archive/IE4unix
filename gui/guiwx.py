@@ -145,7 +145,7 @@ class GUI:
 		self.window.Hide()
 		
 		# Create Window
-		self.window = wx.Frame(None, title=e.title, size=(400, 450))
+		self.window = wx.Frame(None, title=e.title, size=(_width, 450), style=wx.DEFAULT_FRAME_STYLE & ~ (wx.MINIMIZE_BOX | wx.RESIZE_BOX | wx.MAXIMIZE_BOX |wx.RESIZE_BORDER))
 		window_box = wx.BoxSizer(wx.VERTICAL)
 		self.window.SetSizer(window_box)
 		
@@ -165,10 +165,12 @@ class GUI:
 		#Add buttons
 		but_box = wx.BoxSizer(wx.HORIZONTAL)
 		window_box.Add(but_box, 1, wx.EXPAND)
+		self.buttons = []
 		for button in e.buttons:
 			but = wx.Button(self.window, label=button.label)
 			but.pmodel = button
 			but.Bind(wx.EVT_BUTTON, self.callback_button)
+			self.buttons.append(but)
 			but_box.Add(but, 1, wx.EXPAND)
 	
 		# Show everything
@@ -179,7 +181,10 @@ class GUI:
 		wx.CallAfter(self.wx_write_command_line, line)
 		
 	def wx_write_command_line(self, line):
-	
+		# Finished installation, change button
+		if line == "END":
+			self.buttons[0].SetString("Close")
+			return
 		# Delete last line if it is \r
 		if self.remove_next_line and line != '\n':
 			self.console.Remove(self.last_line_position, self.console.GetLastPosition())

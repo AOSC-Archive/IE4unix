@@ -126,7 +126,7 @@ class GUI:
 		self.window = create_window(e.title)
 		add_logo(self.window, e.logo)
 		self.window.set_resizable(True)
-		self.window.resize(500,500)
+		self.window.resize(376,450)
 
 		# Terminal window
 		sw = gtk.ScrolledWindow()
@@ -146,16 +146,23 @@ class GUI:
 		# Create buttons
 		but_box = gtk.HBox()
 		append_component(self.window.main_vbox, but_box)
+		self.buttons = []
 		for button in e.buttons:
 			b = gtk.Button(label=button.label)
 			b.connect("clicked", self.callback_button, None)
 			b.pmodel = button
+			self.buttons.append(b)
 			but_box.pack_start(b)
 
 		# Show everything
 		self.window.show_all()
 
 	def write_command_line(self, line):
+		# Finished installation, change button
+		if line == "END":
+			self.buttons[0].set_label("Close")
+			return
+	
 		# What tag to use
 		tag = self.normal_tag
 		if line[0:2] == '# ':
@@ -185,11 +192,9 @@ class GUI:
 		
 		if line[-1] == '\r': self.remove_next_line = True
 
-
 	# Quit
 	def quit(self):
 		gtk.main_quit()
-
 
 # Auxiliary function
 def create_window(title):

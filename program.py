@@ -1,7 +1,10 @@
 import sys, os
 from model import installer, executor, process
-from gui import guiwx as gui
-#from gui import guigtk as gui
+
+try:
+	from gui import guigtk as gui
+except ImportError:
+	from gui import guiwx as gui
 
 # Platform detection
 MAC = LINUX = False
@@ -82,9 +85,8 @@ def callback_quit():
 def MakeTheExecutor(program):
 	return  executor.ExecutorDefinition()\
 			.title("Installing IEs")\
-			.subtitle("You can stop it anytime")\
 			.logo(program.logo)\
-			.button("Cancel", "cncel.png", callback_cancel)\
+			.button("Cancel", "none.png", callback_cancel)\
 			.set_initial_command("/home/sergio/workspace/ies4linux/trunk/ies4linux", ["--no-color"])\
 			.set_program(program)
 	

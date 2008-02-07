@@ -18,7 +18,7 @@ class ProcessThread:
 	
 		(stdout, stdin) = popen2.popen4(command)
 		self.pid = int(os.popen("ps x | grep bash | grep ies4linux | head -n 1 | awk '{print $1}'").read())
-		print 'PID %s' % self.pid
+		# print 'PID %s' % self.pid
 		
 		line = ''
 		while not self.stopthread.isSet():
@@ -29,10 +29,10 @@ class ProcessThread:
 				self.write_line_callback(line)
 				line = ''
 			
-			if char == '':
-				self.process_finished = True
+			if char == '': break
 				
 		self.write_line_callback(line + '\n')
+		self.write_line_callback('END')
 
 	def kill(self):
 		self.stopthread.set()
