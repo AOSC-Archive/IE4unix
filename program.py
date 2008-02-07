@@ -4,13 +4,9 @@ from gui import guiwx as gui
 #from gui import guigtk as gui
 
 # Platform detection
-#MAC = LINUX = False
-#if sys.platform == 'darwin': MAC = True
-#else: LINUX=True
-
-# Hack
-# LINUX=False
-# MAC=True
+MAC = LINUX = False
+if sys.argv[1] == "mac": MAC=True
+if sys.argv[1] == "linux": LINUX=True
 
 userhome = os.getenv("HOME")
 
@@ -99,7 +95,7 @@ def callback_cancel():
 	sys.exit(0)
 
 # MAIN
-def program_main():
-	_program = MakeTheGUI()
-	g = gui.GUI()
-	g.doInstaller(_program)
+_program = MakeTheGUI()
+g = gui.GUI()
+g.doInstaller(_program)
+
