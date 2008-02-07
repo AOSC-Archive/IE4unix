@@ -1,7 +1,7 @@
 import wx
 
 _width = 376
-_height = 400
+_height = 380
 
 # wxPython GUI implementation
 class GUI:

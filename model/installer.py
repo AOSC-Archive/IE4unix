@@ -5,17 +5,13 @@ class InstallerDefinition:
 		self.tabs = []
 		self.buttons = []
 	
-	def set_title(self, title):
-		self.title = title
+	def set_title(self, title, show=True):
+		if show: self.title = title
 		return self
 
-	def set_subtitle(self, subtitle):
-		self.subtitle = subtitle
-		return self
-
-	def set_logo(self, logo):
+	def set_logo(self, logo, show=True):
 		#TODO validates file existence
-		self.logo = logo
+		if show: self.logo = logo
 		return self
 		
 	def tab(self, label, show = True):		
@@ -28,14 +24,6 @@ class InstallerDefinition:
 		button = _Button(label, img, callback)
 		self.buttons.append(button)
 		return self
-
-	def ignore_platform(self):
-		_res = False
-		if self.platform == 'mac':
-			_res = True
-			
-		self.platform = 'all'
-		return _res
 		
 	# iteration
 	def checkboxes(self):
@@ -72,9 +60,9 @@ class _Tab:
 		self.text = text
 		return self
 	
-	def group(self, label, platform='all'):
+	def group(self, label, show=True):
 		group = _Group(label, self)
-		self.groups.append(group)
+		if show: self.groups.append(group)
 		return group
 		
 	def done(self):
@@ -89,19 +77,19 @@ class _Group:
 		self.textfields = []
 		self.orientation = 'vertical'
 
-	def checkbox(self, label, command, checked=False, platform='all'):
+	def checkbox(self, label, command, checked=False, show=True):
 		checkbox = _CheckBox(label, command, checked, self)
-		self.checkboxes.append(checkbox)
+		if show: self.checkboxes.append(checkbox)
 		return self
 		
-	def combobox(self, label, options, command, selected, platform='all'):
+	def combobox(self, label, options, command, selected, show=True):
 		combo = _ComboBox(label, options, command, selected)
-		self.comboboxes.append(combo)
+		if show: self.comboboxes.append(combo)
 		return self
 		
-	def textfield(self, label, value, command, platform='all'):
+	def textfield(self, label, value, command, show=True):
 		t = _TextField(label, value, command)
-		self.textfields.append(t)
+		if show: self.textfields.append(t)
 		return self
 	
 	def horizontal(self):

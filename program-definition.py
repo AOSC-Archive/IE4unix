@@ -4,39 +4,33 @@ from gui import guiwx as gui
 #from gui import guigtk as gui
 
 # Platform detection
-MAC = LINUX = False
-if sys.platform == 'darwin': MAC = True
-else: LINUX=True
+#MAC = LINUX = False
+#if sys.platform == 'darwin': MAC = True
+#else: LINUX=True
 
 # Hack
 # LINUX=False
 # MAC=True
-
-# Platform dependent configs
-if LINUX:
-	title = "IEs 4 Linux"
-	logo = "linux/logo.png"
-if MAC:
-	title = "IEs 4 Mac"
-	logo = "mac/logo.png"
 
 userhome = os.getenv("HOME")
 
 # Define the GUI
 def MakeTheGUI():
 	return installer.InstallerDefinition()\
-	.set_title(title)\
-	.set_logo(logo)\
+	.set_title("IEs 4 Mac", show=MAC)\
+	.set_title("IEs 4 Linux", show=LINUX)\
+	.set_logo("mac/logo.png", show=MAC)\
+	.set_logo("linux/logo.png", show=LINUX)\
 	.tab("Install options")\
 		.group("Install Internet Explorers")\
 			.checkbox("IE 6.0 SP1", "--install-ie6", True)\
 			.checkbox("IE 5.5", "--install-ie55", False)\
 			.checkbox("IE 5.01", "--install-ie5", False)\
-			.combobox("Locale", "EN-US PT-BR", "--locale", "EN-US")\
+			.combobox("Locale", "AR CN CS DA DE EL EN-US ES FI FR HE HU IT JA KO NL NO PL PT PT-BR RU SV TR TW", "--locale", "EN-US")\
 			.done()\
 		.group("Extra")\
 			.checkbox("Adobe Flash 9", "--install-flash", True)\
-			.checkbox("Core Fonts", "--install-corefonts", True)\
+			.checkbox("Core Fonts", "--install-corefonts", True, show=False)\
 			.vertical()\
 			.done()\
 		.done()\
@@ -49,7 +43,7 @@ def MakeTheGUI():
 	.tab("Advanced", LINUX)\
 		.group("Shortcuts")\
 			.checkbox("Create Desktop Icons", "--create-desktop-icons", True)\
-			.checkbox("Create Menu Entries", "--create-menu", False)\
+			.checkbox("Create Menu Entries", "--create-menu", False, show=False)\
 			.done()\
 		.group("Folders")\
 			.textfield("Base", userhome +"/.ies4linux", "--base-dir")\
@@ -105,6 +99,7 @@ def callback_cancel():
 	sys.exit(0)
 
 # MAIN
-_program = MakeTheGUI()
-g = gui.GUI()
-g.doInstaller(_program)
+def program_main():
+	_program = MakeTheGUI()
+	g = gui.GUI()
+	g.doInstaller(_program)
