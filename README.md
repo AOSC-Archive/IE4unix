@@ -53,6 +53,6 @@ CHANGELOG
 There is always a partial changelog on our blog at:
 http://www.tatanka.com.br/ies4linux/news/
 
-+++
+* * *
 Thanks for using this software!
 Sergio Lopes
