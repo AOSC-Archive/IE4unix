@@ -1,0 +1,5 @@
+#!/bin/bash
+# Check if this is a Mac
+
+test $(uname) = "Darwin"
+exit $?

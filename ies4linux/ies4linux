@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+#
+# IEs 4 Linux/Mac
+# Developed by: Sergio Luis Lopes Junior <slopes at gmail dot com>
+# Projects sites: 
+#	http://tatanka.com.br/ies4linux
+#	http://tatanka.com.br/ies4mac
+#
+# Released under the GNU GPL. See LICENSE for more information
+
+# Discover the script installation folder
+SCRIPTDIR=`dirname "$0"`
+cd "$SCRIPTDIR"
+export SCRIPTDIR=`pwd`
+
+# Where are we running?
+for p in "$SCRIPTDIR"/platforms/*; do
+	if "$p"/identify-platform; then
+		export PLATFORMDIR="$p"
+	fi
+done
+[ "$PLATFORMDIR" = "" ] && echo Not a valid platform && exit 1
+
+# Import functions ($1 filename)
+function load_function_file {
+	# Export all functions so subshells can access them
+	. "$1"
+	for fn in $(grep "^function" "$1" | sed -e 's/function[[:space:]]*//g;s/{//g'); do
+		export -f $fn
+	done
+}
+
+# Load all needed functions
+for f in "$SCRIPTDIR"/lib/functions/*.sh; do
+	load_function_file "$f"
+done
+load_function_file "$PLATFORMDIR"/functions.sh
+
+### Init variables
+export INSTALLIE7=0
+export INSTALLIE6=1
+export INSTALLIE55=0
+export INSTALLIE5=0
+export INSTALLIE2=0
+export INSTALLIE15=0
+export INSTALLIE1=0
+
+export INSTALLFLASH=1
+export INSTALLCOREFONTS=0
+
+export IE6_LOCALE="EN-US"
+export IE6_LOCALES="AR CN CS DA DE EL EN-US ES FI FR HE HU IT JA KO NL NO PL PT PT-BR RU SV TR TW"
+export NOCOLOR=0
+
+# Default places for most platforms (not for Mac)
+export CREATE_DESKTOP_ICON=1
+export CREATE_MENU_ICON=0
+export BASEDIR="$HOME/.ies4linux"
+export BINDIR="$HOME/bin"
+export WGETFLAGS="-c "
+export DOWNLOADDIR_SUFFIX="downloads"
+export DOWNLOADDIR="$BASEDIR/$DOWNLOADDIR_SUFFIX"
+
+# Someone can override some variables
+init_variables
+
+### Configure options ###
+
+# Get command-line options
+while [ $# -gt 0 ]; do
+	case "$1" in
+	--install-ie6 | --install-flash| --create-desktop-icons)   shift;;
+	--install-ie55)     export INSTALLIE55=1;   shift ;;
+	--install-ie5)      export INSTALLIE5=1;    shift ;;
+	--install-ie2)      export INSTALLIE2=1;    shift ;;
+	--install-ie15)     export INSTALLIE15=1;    shift ;;
+	--install-ie1)      export INSTALLIE1=1;    shift ;;
+
+	--install-ie7|--beta-install-ie7) export INSTALLIE7=1;    shift ;;
+	--hack-ie7-proxy-settings)        export HACK_IE7_PROXY=1; shift ;;
+
+	--no-ie6)           export INSTALLIE6=0;   shift ;;
+	--no-flash)         export INSTALLFLASH=0;  shift ;;
+	--no-desktop-icon)  export CREATE_DESKTOP_ICON=0;   shift ;;
+	--no-menu-icon)     export CREATE_MENU_ICON=0;   shift ;;
+	--install-corefonts) export INSTALLCOREFONTS=1; shift ;;
+	
+	--base-dir)          export BASEDIR="$2";     shift 2 ;;
+	--bin-dir)           export BINDIR="$2";      shift 2 ;;
+	--download-dir)	    export DOWNLOADDIR="$2"; changeddownloaddir=1; shift 2 ;;
+	--wget-flags)       export WGETFLAGS="$2";   shift 2 ;;
+	
+	--no-color)	    export NOCOLOR=1;        shift 1 ;;
+	--locale)
+		export IE6_LOCALE=$(echo "$2" | tr a-z A-Z)
+		echo " $IE6_LOCALES " | grep " $IE6_LOCALE " &> /dev/null || error Invalid locale! Please run IEs4Linux again and choose a valid one.
+		shift 2
+		;;
+	--list-locales)
+		echo $IE6_LOCALES | fmt -w 40
+		exit 0
+		;;
+	--debug)
+		export DEBUG=true
+		shift
+		;;
+	--help | -h)
+		sh lib/help.sh
+		exit 0
+		;;
+	--full-help)
+		sh lib/help.sh full
+		exit 0
+		;;	
+	*)
+		echo "Error: unknown option \"$1\""
+		if echo "$1" | grep '=' >/dev/null; then
+			echo "Options are not GNU-style"
+			echo "  i.e. don't use: --option=value"
+			echo "     use instead: --option value"
+		fi
+		echo "run \"./ies4linux --help\" for more info"
+		exit 1
+		;;
+	esac
+done
+
+# Hack for downloaddir
+if [ "$changeddownloaddir" != "1" ]; then
+	DOWNLOADDIR="$BASEDIR/$DOWNLOADDIR_SUFFIX"
+fi
+
+# See if user chose at least one IE
+if [ "$((INSTALLIE6+INSTALLIE55+INSTALLIE5+INSTALLIE7+INSTALLIE1+INSTALLIE2+INSTALLIE15))" = "0" ]; then
+	error Please choose at least one IE version to install
+fi
+
+# Initialize tmp dir
+export TMPDIR="$BASEDIR/tmp/"
+mkdir -p "$TMPDIR" || error Needs $TMPDIR for temporary files
+
+# Check dependencies for wine, cabextract, wget, unzip
+find_wine
+find_cabextract
+find_download_program
+find_unzip
+
+# TODO add sudo warning too
+# Check for root
+[ "$(whoami)" = "root" ] && warning "You are root! This is very discouraged! IE is too insecure for you to give him root access.\nWant a tip from a friend? Run ies4linux as your normal user or, what's better, if you can, create a separate user just to handle your IEs."
+
+### Run installer ###
+bash "$SCRIPTDIR"/lib/install.sh
+
+# Remove temp dir
+rm -rf "$TMPDIR"
+
+

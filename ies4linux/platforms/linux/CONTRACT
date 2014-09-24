@@ -1,0 +1,27 @@
+CONTRACT TO FOLLOW WHEN CREATING NEW PLATFORMS
+
+- Create a platform folder
+
+- identify-platform executable must identify the platform returnin 0 or 1
+
+- functions.sh overwrites default functions or add new functions
+
+- uninstall: executable to uninstall all IEs
+
+- logo.png is a 64x64px platform logo
+
+- we can create other auxiliary files
+
+MUST HAVE FUNCTIONS (on functions.sh)
+
+I: prints IEs4Linux platform name
+init_variables: exports needed variables
+get_start_page: (private)
+create_shortcuts: creates all executables and Desktop icons
+pre-install: executed just before installation process begin
+post-install: executed just after installation process ends
+
+MUST HAVE INIT VARIABLES (on init_variables)
+
+PLATFORM= current platform
+TMPDIR= user-safe tmp dir
